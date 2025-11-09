@@ -1,0 +1,42 @@
+{
+  "name": "cassette-store",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "format": "prettier --write \"**/*.{js,ts,jsx,tsx,md,json}\""
+  },
+  "dependencies": {
+    "@types/node": "20.10.0",
+    "@types/react": "18.2.39",
+    "@types/react-dom": "18.2.17",
+    "axios": "^1.6.2",
+    "cloudinary": "^1.41.0",
+    "dotenv": "^17.2.3",
+    "lucide-react": "^0.292.0",
+    "midtrans-client": "^1.3.1",
+    "mongodb": "^6.3.0",
+    "mongoose": "^8.0.1",
+    "multer": "^1.4.5-lts.1",
+    "next": "16.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hot-toast": "^2.4.1",
+    "recharts": "^2.10.1",
+    "typescript": "^5.3.2",
+    "zustand": "^4.4.7"
+  },
+  "devDependencies": {
+    "@types/multer": "^1.4.11",
+    "autoprefixer": "10.4.19",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "16.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "postcss": "8.4.47",
+    "prettier": "^3.1.0",
+    "tailwindcss": "3.4.13"
+  }
+}

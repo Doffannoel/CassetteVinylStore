@@ -1,0 +1,106 @@
+// Product types
+export interface Product {
+  _id: string;
+  name: string;
+  artist?: string;
+  price: number;
+  originalPrice?: number;
+  images: string[];
+  description: string;
+  category: 'vinyl' | 'cd' | 'cassette';
+  genre?: string;
+  releaseYear?: number;
+  label?: string;
+  stock: number;
+  isAvailable: boolean;
+  featured?: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Cart types
+export interface CartItem {
+  product: Product;
+  quantity: number;
+}
+
+export interface Cart {
+  items: CartItem[];
+  totalAmount: number;
+  totalItems: number;
+}
+
+// Order types
+export interface OrderItem {
+  product: string | Product;
+  quantity: number;
+  price: number;
+}
+
+export interface Order {
+  _id?: string;
+  orderId: string;
+  items: OrderItem[];
+  customerInfo: CustomerInfo;
+  totalAmount: number;
+  status: 'pending' | 'processing' | 'paid' | 'shipped' | 'completed' | 'cancelled';
+  paymentMethod?: string;
+  paymentStatus?: string;
+  midtransToken?: string;
+  midtransRedirectUrl?: string;
+  notes?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+// Customer types
+export interface CustomerInfo {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  postalCode: string;
+}
+
+// Admin types
+export interface AdminStats {
+  totalSales: number;
+  totalOrders: number;
+  totalProducts: number;
+  lowStockProducts: Product[];
+  recentOrders: Order[];
+  salesByMonth: {
+    month: string;
+    sales: number;
+  }[];
+  salesByCategory: {
+    category: string;
+    sales: number;
+  }[];
+}
+
+// API Response types
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+
+// Filter and sorting
+export interface ProductFilters {
+  category?: 'vinyl' | 'cd' | 'cassette' | '';
+  priceRange?: {
+    min: number;
+    max: number;
+  };
+  genre?: string;
+  inStock?: boolean;
+  search?: string;
+}
+
+export interface SortOption {
+  field: 'price' | 'name' | 'releaseYear' | 'createdAt';
+  order: 'asc' | 'desc';
+}

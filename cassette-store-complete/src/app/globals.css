@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-primary-bg text-text-body;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading text-text-primary;
+  }
+
+  a {
+    @apply text-text-link hover:text-accent-gold transition-colors;
+  }
+}
+
+@layer components {
+  .container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn-primary {
+    @apply bg-accent-gold text-white px-6 py-3 rounded-none hover:bg-accent-hover transition-all uppercase tracking-wider font-semibold;
+  }
+
+  .btn-secondary {
+    @apply bg-transparent text-text-primary border-2 border-text-primary px-6 py-3 rounded-none hover:bg-text-primary hover:text-primary-bg transition-all uppercase tracking-wider font-semibold;
+  }
+
+  .product-card {
+    @apply bg-white border border-neutral-divider hover:shadow-lg transition-shadow;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2 border border-neutral-divider bg-white text-text-body focus:border-accent-gold focus:outline-none;
+  }
+
+  .badge {
+    @apply inline-block px-2 py-1 text-xs font-semibold uppercase tracking-wider;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-primary-bg;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-accent-gold rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-accent-hover;
+}

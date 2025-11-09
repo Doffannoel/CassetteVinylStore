@@ -3,12 +3,13 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { X, Plus, Minus, ShoppingBag } from 'lucide-react';
+import { X, Plus, Minus, ShoppingBag, Music } from 'lucide-react';
 import useCartStore from '@/store/cartStore';
 
 const CartDrawer = () => {
   const [mounted, setMounted] = useState(false);
-  const { items, isOpen, toggleCart, removeItem, updateQuantity, getTotalAmount, clearCart } = useCartStore();
+  const { items, isOpen, toggleCart, removeItem, updateQuantity, getTotalAmount, clearCart } =
+    useCartStore();
   const totalAmount = getTotalAmount();
 
   useEffect(() => {
@@ -28,12 +29,7 @@ const CartDrawer = () => {
   return (
     <>
       {/* Backdrop */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={toggleCart}
-        />
-      )}
+      {isOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={toggleCart} />}
 
       {/* Drawer */}
       <div
@@ -58,17 +54,17 @@ const CartDrawer = () => {
             <div className="flex flex-col items-center justify-center py-12">
               <ShoppingBag size={48} className="text-neutral-divider mb-4" />
               <p className="text-text-body">Your cart is empty</p>
-              <button
-                onClick={toggleCart}
-                className="btn-primary mt-6"
-              >
+              <button onClick={toggleCart} className="btn-primary mt-6">
                 Continue Shopping
               </button>
             </div>
           ) : (
             <div className="p-4 space-y-4">
               {items.map((item) => (
-                <div key={item.product._id} className="flex gap-4 pb-4 border-b border-neutral-divider">
+                <div
+                  key={item.product._id}
+                  className="flex gap-4 pb-4 border-b border-neutral-divider"
+                >
                   {/* Product Image */}
                   <div className="w-20 h-20 bg-neutral-card flex-shrink-0">
                     {item.product.images?.[0] ? (
@@ -132,9 +128,7 @@ const CartDrawer = () => {
           <div className="border-t border-neutral-divider p-4">
             <div className="flex justify-between mb-4">
               <span className="text-lg font-semibold">Total:</span>
-              <span className="text-lg font-bold text-accent-gold">
-                {formatPrice(totalAmount)}
-              </span>
+              <span className="text-lg font-bold text-accent-gold">{formatPrice(totalAmount)}</span>
             </div>
             <Link
               href="/checkout"

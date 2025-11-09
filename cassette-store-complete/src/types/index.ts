@@ -35,6 +35,9 @@ export interface OrderItem {
   product: string | Product;
   quantity: number;
   price: number;
+  name?: string;
+  artist?: string;
+  category?: 'vinyl' | 'cd' | 'cassette';
 }
 
 export interface Order {
@@ -43,14 +46,25 @@ export interface Order {
   items: OrderItem[];
   customerInfo: CustomerInfo;
   totalAmount: number;
-  status: 'pending' | 'processing' | 'paid' | 'shipped' | 'completed' | 'cancelled';
+  status:
+    | 'pending'
+    | 'processing'
+    | 'paid'
+    | 'shipped'
+    | 'completed'
+    | 'cancelled'
+    | 'ready_pickup';
   paymentMethod?: string;
   paymentStatus?: string;
   midtransToken?: string;
   midtransRedirectUrl?: string;
   notes?: string;
+  pickupCode?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  pickupStatus?: 'pending' | 'ready_pickup' | 'picked_up';
+  pickedUpBy?: string;
+  pickedUpAt?: Date;
 }
 
 // Customer types

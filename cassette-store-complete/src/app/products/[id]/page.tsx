@@ -5,7 +5,18 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Product } from '@/types';
 import useCartStore from '@/store/cartStore';
-import { ShoppingBag, ChevronLeft, Loader2, Music, Disc, Heart, Share2, Truck, Shield, RotateCcw } from 'lucide-react';
+import {
+  ShoppingBag,
+  ChevronLeft,
+  Loader2,
+  Music,
+  Disc,
+  Heart,
+  Share2,
+  Truck,
+  Shield,
+  RotateCcw,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import ProductCard from '@/components/products/ProductCard';
 
@@ -13,7 +24,7 @@ export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { addItem } = useCartStore();
-  
+
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -104,7 +115,7 @@ export default function ProductDetailPage() {
     );
   }
 
-  const discount = product.originalPrice 
+  const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
@@ -116,7 +127,7 @@ export default function ProductDetailPage() {
           Products
         </button>
         <span>/</span>
-        <button 
+        <button
           onClick={() => router.push(`/products?category=${product.category}`)}
           className="hover:text-accent-gold capitalize"
         >
@@ -170,26 +181,14 @@ export default function ProductDetailPage() {
         <div>
           {/* Category & Badges */}
           <div className="flex items-center gap-2 mb-2">
-            <span className="badge bg-text-primary text-white capitalize">
-              {product.category}
-            </span>
-            {product.featured && (
-              <span className="badge bg-accent-gold text-white">
-                Featured
-              </span>
-            )}
-            {discount > 0 && (
-              <span className="badge bg-red-500 text-white">
-                -{discount}%
-              </span>
-            )}
+            <span className="badge bg-text-primary text-white capitalize">{product.category}</span>
+            {product.featured && <span className="badge bg-accent-gold text-white">Featured</span>}
+            {discount > 0 && <span className="badge bg-red-500 text-white">-{discount}%</span>}
           </div>
 
           {/* Artist */}
           {product.artist && product.artist !== product.name && (
-            <p className="text-sm text-text-body uppercase tracking-wider mb-2">
-              {product.artist}
-            </p>
+            <p className="text-sm text-text-body uppercase tracking-wider mb-2">{product.artist}</p>
           )}
 
           {/* Name */}
@@ -218,65 +217,94 @@ export default function ProductDetailPage() {
 
           {/* Price */}
           <div className="mb-6">
-            <div className="flex items-center gap-3">
-              <span className="text-3xl font-bold text-accent-gold">
-                {formatPrice(product.price)}
-              </span>
-              {product.originalPrice && (
-                <span className="text-xl text-text-body line-through">
-                  {formatPrice(product.originalPrice)}
+            {product.status === 'for_sale' ? (
+              <div className="flex items-center gap-3">
+                <span className="text-3xl font-bold text-accent-gold">
+                  {formatPrice(product.price)}
                 </span>
-              )}
-            </div>
+                {product.originalPrice && (
+                  <span className="text-xl text-text-body line-through">
+                    {formatPrice(product.originalPrice)}
+                  </span>
+                )}
+              </div>
+            ) : (
+              <div className="text-2xl font-bold text-text-body">
+                {product.status === 'in_collection' ? 'Only For Display' : 'Sold'}
+              </div>
+            )}
           </div>
 
           {/* Stock Status */}
           <div className="mb-6">
-            {product.stock > 0 ? (
+            {product.stock > 0 && product.status === 'for_sale' ? (
               <p className={`text-sm ${product.stock <= 5 ? 'text-orange-600' : 'text-green-600'}`}>
-                {product.stock <= 5 
-                  ? `Only ${product.stock} left in stock!` 
-                  : `${product.stock} items in stock`
-                }
+                {product.stock <= 5
+                  ? `Only ${product.stock} left in stock!`
+                  : `${product.stock} items in stock`}
               </p>
-            ) : (
+            ) : product.status === 'for_sale' && product.stock === 0 ? (
               <p className="text-red-600 font-semibold">Out of stock</p>
-            )}
+            ) : null}
           </div>
 
           {/* Quantity & Add to Cart */}
-          {product.stock > 0 && (
-            <div className="flex gap-4 mb-6">
-              <div className="flex items-center border border-neutral-divider">
+          {product.status === 'for_sale' ? (
+            product.stock > 0 ? (
+              <div className="flex gap-4 mb-6">
+                <div className="flex items-center border border-neutral-divider">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="px-4 py-2 hover:bg-neutral-card"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    value={quantity}
+                    onChange={(e) =>
+                      setQuantity(
+                        Math.min(product.stock, Math.max(1, parseInt(e.target.value) || 1))
+                      )
+                    }
+                    className="w-16 text-center py-2"
+                  />
+                  <button
+                    onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                    className="px-4 py-2 hover:bg-neutral-card"
+                  >
+                    +
+                  </button>
+                </div>
+
                 <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="px-4 py-2 hover:bg-neutral-card"
+                  onClick={handleAddToCart}
+                  className="btn-primary flex-1 flex items-center justify-center gap-2"
                 >
-                  -
-                </button>
-                <input
-                  type="number"
-                  value={quantity}
-                  onChange={(e) => setQuantity(Math.min(product.stock, Math.max(1, parseInt(e.target.value) || 1)))}
-                  className="w-16 text-center py-2"
-                />
-                <button
-                  onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                  className="px-4 py-2 hover:bg-neutral-card"
-                >
-                  +
+                  <ShoppingBag size={20} />
+                  Add to Cart
                 </button>
               </div>
-
+            ) : (
+              <div className="mb-6">
+                <button
+                  disabled
+                  className="btn-disabled w-full flex items-center justify-center gap-2"
+                >
+                  Out of Stock
+                </button>
+              </div>
+            )
+          ) : product.status === 'in_collection' ? (
+            <div className="mb-6">
               <button
-                onClick={handleAddToCart}
-                className="btn-primary flex-1 flex items-center justify-center gap-2"
+                disabled
+                className="bg-accent-gold text-white px-6 py-3 rounded-none transition-all uppercase tracking-wider font-semibold w-full flex items-center justify-center gap-2"
               >
-                <ShoppingBag size={20} />
-                Add to Cart
+                Display Product is not for sale
               </button>
             </div>
-          )}
+          ) : null}
 
           {/* Action Buttons */}
           <div className="flex gap-4 mb-8">

@@ -308,7 +308,7 @@ export default function Home() {
                 </h3>
                 <div className="aspect-video rounded-lg overflow-hidden shadow-lg">
                   <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3953.098!2d110.3657!3d-7.7956!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a5787bd5b6c6d%3A0x6c8b1c8b1c8b1c8b!2sMalioboro%20Street!5e0!3m2!1sen!2sid!4v1703123456789!5m2!1sen!2sid"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.0171318979915!2d106.8105989!3d-6.2614732!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f100097cb793%3A0xce1f3ffd86912b0c!2sHYSETRIA%20music!5e0!3m2!1sen!2sid!4v1763055704675!5m2!1sen!2sid"
                     width="100%"
                     height="100%"
                     style={{ border: 0 }}

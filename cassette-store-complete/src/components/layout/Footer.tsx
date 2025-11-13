@@ -16,15 +16,17 @@ const Footer = () => {
             <div className="space-y-0.5">
               <div className="flex items-center gap-1.5">
                 <MapPin size={14} className="text-accent-gold" />
-                <span className="text-xs">Jl. Malioboro No. 123, Yogyakarta</span>
+                <span className="text-xs">
+                  Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12150
+                </span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Phone size={14} className="text-accent-gold" />
-                <span className="text-xs">+62 812-3456-7890</span>
+                <span className="text-xs">+62 818-908-186</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Mail size={14} className="text-accent-gold" />
-                <span className="text-xs">info@cassettestore.com</span>
+                <span className="text-xs">storecassette87@gmail.com</span>
               </div>
             </div>
           </div>
@@ -36,15 +38,8 @@ const Footer = () => {
               <div className="flex items-center gap-1.5">
                 <Clock size={14} className="text-accent-gold" />
                 <div>
-                  <p className="font-medium">Monday - Friday</p>
-                  <p className="text-primary-bg/80 text-xs">10:00 AM - 8:00 PM</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Clock size={14} className="text-accent-gold" />
-                <div>
-                  <p className="font-medium">Saturday - Sunday</p>
-                  <p className="text-primary-bg/80 text-xs">9:00 AM - 9:00 PM</p>
+                  <p className="font-medium">Monday - Sunday</p>
+                  <p className="text-primary-bg/80 text-xs">11:00 AM - 8:00 PM</p>
                 </div>
               </div>
             </div>

@@ -56,9 +56,6 @@ export async function GET(request: NextRequest) {
       query.status = status;
     }
 
-    // Always filter by available products
-    query.isAvailable = true;
-
     // Calculate skip for pagination
     const skip = (page - 1) * limit;
 

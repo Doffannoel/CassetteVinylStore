@@ -12,13 +12,11 @@ const Header = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [mounted, setMounted] = useState(false);
 
-  const { getTotalItems, toggleCart } = useCartStore();
-  const [totalItems, setTotalItems] = useState(0);
+  const { toggleCart } = useCartStore();
 
   useEffect(() => {
     setMounted(true);
-    setTotalItems(getTotalItems());
-  }, [getTotalItems]);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +43,7 @@ const Header = () => {
             <Link href="/" className="flex items-center gap-2">
               <Music className="h-8 w-8 text-accent-gold" />
               <div>
-                <h1 className="text-2xl font-heading text-text-primary">CASSETTE STORE</h1>
+                <h1 className="text-2xl font-heading text-text-primary">Hysteria Music</h1>
                 <p className="text-xs text-text-body uppercase tracking-wider">EST. 1946</p>
               </div>
             </Link>
@@ -94,9 +92,9 @@ const Header = () => {
                 className="relative p-2 text-text-primary hover:text-accent-gold transition-colors"
               >
                 <ShoppingBag size={20} />
-                {mounted && totalItems > 0 && (
+                {mounted && useCartStore.getState().getTotalItems() > 0 && (
                   <span className="absolute -top-1 -right-1 bg-accent-gold text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {totalItems}
+                    {useCartStore.getState().getTotalItems()}
                   </span>
                 )}
               </button>

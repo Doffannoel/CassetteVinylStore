@@ -126,7 +126,7 @@ export default function PaymentSuccessPage() {
         <div className="text-center mb-8">
           <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-4" />
           <h1 className="text-3xl font-heading mb-2">Pembayaran Berhasil!</h1>
-          <p className="text-text-body">Terima kasih telah berbelanja di Cassette Store</p>
+          <p className="text-text-body">Terima kasih telah berbelanja di Hysteria Music</p>
         </div>
 
         {order && (
@@ -227,7 +227,7 @@ export default function PaymentSuccessPage() {
             <div className="border border-neutral-divider rounded-lg p-6 mb-6">
               <h3 className="font-semibold mb-3">📍 Lokasi Pengambilan</h3>
               <p className="text-text-body">
-                <strong>{process.env.NEXT_PUBLIC_STORE_NAME || 'Cassette Store Jakarta'}</strong>
+                <strong>{process.env.NEXT_PUBLIC_STORE_NAME || 'Hysteria Music Jakarta'}</strong>
                 <br />
                 {process.env.NEXT_PUBLIC_STORE_ADDRESS || 'Jl. Musik No. 123, Jakarta Selatan'}
                 <br />

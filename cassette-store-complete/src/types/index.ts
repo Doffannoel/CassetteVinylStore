@@ -3,6 +3,7 @@ export interface Product {
   _id: string;
   name: string;
   artist?: string;
+  album?: string;
   price: number;
   originalPrice?: number;
   images: string[];
@@ -13,6 +14,7 @@ export interface Product {
   label?: string;
   stock: number;
   isAvailable: boolean;
+  status: 'for_sale' | 'in_collection' | 'sold';
   featured?: boolean;
   createdAt: Date;
   updatedAt: Date;

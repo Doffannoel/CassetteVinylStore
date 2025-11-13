@@ -1,11 +1,13 @@
-# 📦 Cassette Store - Setup Instructions
+# 📦 Hysteria Music - Setup Instructions
 
 ## 🎯 Project Overview
+
 E-commerce untuk toko cassette, CD, dan vinyl dengan tampilan mirip Swee Lee.
 
 ## 📋 Setup MongoDB Atlas
 
 ### Step 1: Buat Account MongoDB Atlas
+
 1. Buka https://www.mongodb.com/cloud/atlas
 2. Sign up / Sign in
 3. Pilih "Build a Database"
@@ -14,6 +16,7 @@ E-commerce untuk toko cassette, CD, dan vinyl dengan tampilan mirip Swee Lee.
 6. Cluster Name: cassette-cluster
 
 ### Step 2: Setup Database Access
+
 1. Di sidebar kiri, klik "Database Access"
 2. Klik "Add New Database User"
 3. Username: cassette-admin
@@ -22,6 +25,7 @@ E-commerce untuk toko cassette, CD, dan vinyl dengan tampilan mirip Swee Lee.
 6. Klik "Add User"
 
 ### Step 3: Setup Network Access
+
 1. Di sidebar kiri, klik "Network Access"
 2. Klik "Add IP Address"
 3. Klik "Allow Access from Anywhere" (untuk development)
@@ -29,6 +33,7 @@ E-commerce untuk toko cassette, CD, dan vinyl dengan tampilan mirip Swee Lee.
 4. Klik "Confirm"
 
 ### Step 4: Get Connection String
+
 1. Kembali ke "Database" menu
 2. Klik "Connect" pada cluster Anda
 3. Pilih "Connect your application"
@@ -37,6 +42,7 @@ E-commerce untuk toko cassette, CD, dan vinyl dengan tampilan mirip Swee Lee.
 6. Tambahkan nama database: `/cassette-store?retryWrites=true&w=majority`
 
 Connection string final:
+
 ```
 mongodb+srv://cassette-admin:<password>@cassette-cluster.xxxxx.mongodb.net/cassette-store?retryWrites=true&w=majority
 ```
@@ -44,11 +50,13 @@ mongodb+srv://cassette-admin:<password>@cassette-cluster.xxxxx.mongodb.net/casse
 ## ☁️ Setup Cloudinary
 
 ### Step 1: Buat Account Cloudinary
+
 1. Buka https://cloudinary.com
 2. Sign up (gratis)
 3. Verify email
 
 ### Step 2: Get API Credentials
+
 1. Dashboard → Account Details
 2. Copy:
    - Cloud name
@@ -56,6 +64,7 @@ mongodb+srv://cassette-admin:<password>@cassette-cluster.xxxxx.mongodb.net/casse
    - API Secret
 
 ### Step 3: Setup Upload Preset
+
 1. Settings → Upload
 2. Klik "Add upload preset"
 3. Preset name: cassette-store
@@ -66,11 +75,13 @@ mongodb+srv://cassette-admin:<password>@cassette-cluster.xxxxx.mongodb.net/casse
 ## 💳 Setup Midtrans
 
 ### Step 1: Buat Account Midtrans
+
 1. Buka https://dashboard.sandbox.midtrans.com/register
 2. Sign up (untuk testing/sandbox dulu)
 3. Verify email
 
 ### Step 2: Get API Keys
+
 1. Login ke dashboard
 2. Settings → Access Keys
 3. Copy:
@@ -78,6 +89,7 @@ mongodb+srv://cassette-admin:<password>@cassette-cluster.xxxxx.mongodb.net/casse
    - Server Key (untuk backend)
 
 ### Step 3: Setup Snap Preferences
+
 1. Settings → Snap Preferences
 2. System Settings:
    - Payment Success Redirect URL: https://your-domain.vercel.app/payment/success
@@ -86,6 +98,7 @@ mongodb+srv://cassette-admin:<password>@cassette-cluster.xxxxx.mongodb.net/casse
 3. Save
 
 ### Step 4: Enable Payment Methods
+
 1. Settings → Payment Methods
 2. Enable:
    - Credit/Debit Card
@@ -96,6 +109,7 @@ mongodb+srv://cassette-admin:<password>@cassette-cluster.xxxxx.mongodb.net/casse
 ## 🚀 Setup Vercel Deployment
 
 ### Step 1: Push ke GitHub
+
 ```bash
 git init
 git add .
@@ -106,6 +120,7 @@ git push -u origin main
 ```
 
 ### Step 2: Deploy ke Vercel
+
 1. Buka https://vercel.com
 2. Sign in dengan GitHub
 3. Klik "New Project"
@@ -114,11 +129,13 @@ git push -u origin main
 6. Deploy
 
 ### Step 3: Setup Domain (Optional)
+
 1. Settings → Domains
 2. Add domain Anda
 3. Configure DNS sesuai instruksi
 
 ### Step 4: Setup Webhook untuk Midtrans
+
 1. Di Midtrans Dashboard:
    - Settings → Configuration
    - Notification URL: https://your-domain.vercel.app/api/midtrans/notification
@@ -141,6 +158,7 @@ NEXT_PUBLIC_BASE_URL=https://your-domain.vercel.app
 ```
 
 ## ✅ Testing Checklist
+
 - [ ] MongoDB connection working
 - [ ] Cloudinary image upload working
 - [ ] Midtrans payment sandbox working
@@ -151,6 +169,7 @@ NEXT_PUBLIC_BASE_URL=https://your-domain.vercel.app
 - [ ] Order management working
 
 ## 🔐 Security Notes
+
 1. Ganti ADMIN_PASSWORD dengan password yang kuat
 2. Untuk production, ubah NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION=true
 3. Batasi MongoDB Network Access ke IP Vercel saja

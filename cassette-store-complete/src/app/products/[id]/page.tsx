@@ -186,7 +186,7 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Artist */}
-          {product.artist && (
+          {product.artist && product.artist !== product.name && (
             <p className="text-sm text-text-body uppercase tracking-wider mb-2">
               {product.artist}
             </p>

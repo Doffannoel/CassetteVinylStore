@@ -1,3 +1,5 @@
+// src\app\api\products\route.ts
+
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
@@ -18,6 +20,7 @@ export async function GET(request: NextRequest) {
     const genre = searchParams.get('genre');
     const inStock = searchParams.get('inStock');
     const featured = searchParams.get('featured');
+    const status = searchParams.get('status');
     const sort = searchParams.get('sort') || '-createdAt';
 
     // Build query
@@ -49,6 +52,10 @@ export async function GET(request: NextRequest) {
       query.featured = true;
     }
 
+    if (status) {
+      query.status = status;
+    }
+
     // Always filter by available products
     query.isAvailable = true;
 
@@ -57,11 +64,7 @@ export async function GET(request: NextRequest) {
 
     // Execute query with pagination
     const [products, totalCount] = await Promise.all([
-      Product.find(query)
-        .sort(sort)
-        .skip(skip)
-        .limit(limit)
-        .lean(),
+      Product.find(query).sort(sort).skip(skip).limit(limit).lean(),
       Product.countDocuments(query),
     ]);
 
@@ -127,6 +130,9 @@ export async function POST(request: NextRequest) {
         );
       }
     }
+
+    // Optional fields: album, status
+    // album is string, status is enum ['for_sale', 'in_collection', 'sold']
 
     // Create product
     const product = await Product.create(body);

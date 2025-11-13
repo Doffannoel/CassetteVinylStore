@@ -8,7 +8,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Store Information */}
           <div>
-            <h3 className="text-xl font-heading mb-2 text-accent-gold">Cassette Store</h3>
+            <h3 className="text-xl font-heading mb-2 text-accent-gold">Hysteria Music</h3>
             <p className="text-primary-bg/80 mb-2 text-sm">
               Your ultimate destination for vinyl records, CDs, and cassettes. Discover timeless
               music in every format.
@@ -139,7 +139,7 @@ const Footer = () => {
         <div className="container">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-primary-bg/80">
-              &copy; 2024 Cassette Store. All rights reserved.
+              &copy; 2024 Hysteria Music. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm">
               <a

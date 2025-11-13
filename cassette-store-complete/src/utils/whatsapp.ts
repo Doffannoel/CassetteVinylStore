@@ -53,7 +53,7 @@ export const generateWhatsAppMessage = (orderData: WhatsAppOrderData): string =>
     storePhone,
   } = orderData;
 
-  let message = `🎵 *CASSETTE STORE - BUKTI PEMBAYARAN* 🎵\n\n`;
+  let message = `🎵 *HYSTERIA MUSIC - BUKTI PEMBAYARAN* 🎵\n\n`;
   message += `✅ *PEMBAYARAN BERHASIL!*\n`;
   message += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
@@ -76,7 +76,7 @@ export const generateWhatsAppMessage = (orderData: WhatsAppOrderData): string =>
   message += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
   message += `📍 *AMBIL BARANG DI TOKO*\n`;
-  message += storeAddress || `Cassette Store\nJl. Musik No. 123\nJakarta Selatan\n`;
+  message += storeAddress || `Hysteria Music\nJl. Musik No. 123\nJakarta Selatan\n`;
   message += `\n📞 Hubungi: ${storePhone || '021-12345678'}\n\n`;
 
   message += `⚠️ *PENTING:*\n`;

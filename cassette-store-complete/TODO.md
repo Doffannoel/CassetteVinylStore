@@ -1,29 +1,8 @@
-# Add Comprehensive Footer
+# TODO: Replace "Cassette Store" with "Hysteria Music"
 
-## Information Gathered
-
-- Current footer is basic with simple text
-- Need to add store information, social media accounts, and Google Maps location
-- Footer should be comprehensive with multiple sections
-
-## Plan
-
-- [x] Read current Footer component
-- [x] Add contact information section (address, phone, email)
-- [x] Add social media links with icons (Instagram, Facebook, Twitter, etc.)
-- [x] Integrate Google Maps embed for store location
-- [x] Add store hours and additional info
-- [x] Update styling to match theme and be responsive
-- [x] Add proper spacing and layout
-
-## Dependent Files
-
-- src/components/layout/Footer.tsx: Main footer component to enhance
-
-## Followup Steps
-
-- [ ] Test all social media links
-- [ ] Verify Google Maps embed works correctly
-- [ ] Check responsive layout on different screen sizes
-- [ ] Ensure contact information is accurate
-- [ ] Test footer appearance and functionality
+- [x] Edit src/utils/whatsapp.ts: Replace "Cassette Store" with "Hysteria Music"
+- [x] Edit src/components/layout/Footer.tsx: Replace "Cassette Store" with "Hysteria Music"
+- [x] Edit src/app/payment/success/page.tsx: Replace "Cassette Store" with "Hysteria Music" and "Cassette Store Jakarta" with "Hysteria Music Jakarta"
+- [x] Edit src/app/page.tsx: Replace "Cassette Store Location" with "Hysteria Music Location"
+- [x] Edit src/app/layout.tsx: Replace "Cassette Store - Vinyl, CD & Cassette Shop" with "Hysteria Music - Vinyl, CD & Cassette Shop"
+- [x] Edit SETUP_INSTRUCTIONS.md: Replace "# 📦 Cassette Store - Setup Instructions" with "# 📦 Hysteria Music - Setup Instructions"

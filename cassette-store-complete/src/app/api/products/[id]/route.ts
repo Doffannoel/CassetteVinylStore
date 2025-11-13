@@ -1,3 +1,5 @@
+// src\app\api\products\[id]\route.ts
+
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
@@ -5,12 +7,16 @@ import Product from '@/models/Product';
 // GET /api/products/[id] - Get single product
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     await connectDB();
 
-    const product = await Product.findById(params.id).lean();
+    const url = new URL(request.url);
+    const pathSegments = url.pathname.split('/');
+    const id = pathSegments[pathSegments.length - 1]; // Get the last segment
+
+    const product = await Product.findById(id).lean();
 
     if (!product) {
       return NextResponse.json(
@@ -42,7 +48,7 @@ export async function GET(
 // PUT /api/products/[id] - Update product (Admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     // Check admin authentication
@@ -68,8 +74,12 @@ export async function PUT(
     delete body.createdAt;
     delete body.updatedAt;
 
+    const url = new URL(request.url);
+    const pathSegments = url.pathname.split('/');
+    const id = pathSegments[pathSegments.length - 1];
+
     const product = await Product.findByIdAndUpdate(
-      params.id,
+      id,
       body,
       { new: true, runValidators: true }
     );
@@ -105,7 +115,7 @@ export async function PUT(
 // DELETE /api/products/[id] - Delete product (Admin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     // Check admin authentication
@@ -124,7 +134,11 @@ export async function DELETE(
 
     await connectDB();
 
-    const product = await Product.findByIdAndDelete(params.id);
+    const url = new URL(request.url);
+    const pathSegments = url.pathname.split('/');
+    const id = pathSegments[pathSegments.length - 1];
+
+    const product = await Product.findByIdAndDelete(id);
 
     if (!product) {
       return NextResponse.json(

@@ -22,13 +22,27 @@ const ProductFilters = () => {
   ];
 
   const genres = [
-    'Rock', 'Pop', 'Jazz', 'Classical', 'Electronic', 
-    'Hip Hop', 'R&B', 'Country', 'Folk', 'Indie'
+    'Rock',
+    'Pop',
+    'Jazz',
+    'Classical',
+    'Electronic',
+    'Hip Hop',
+    'R&B',
+    'Country',
+    'Folk',
+    'Indie',
+  ];
+
+  const statuses = [
+    { value: 'for_sale', label: 'For Sale' },
+    { value: 'in_collection', label: 'In Collection' },
+    { value: 'sold', label: 'Sold' },
   ];
 
   const updateFilter = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    
+
     if (value) {
       params.set(key, value);
     } else {
@@ -59,10 +73,7 @@ const ProductFilters = () => {
           Filters
         </h2>
         {hasActiveFilters() && (
-          <button
-            onClick={clearFilters}
-            className="text-sm text-red-600 hover:underline"
-          >
+          <button onClick={clearFilters} className="text-sm text-red-600 hover:underline">
             Clear All
           </button>
         )}
@@ -72,14 +83,14 @@ const ProductFilters = () => {
       <div>
         <h3 className="font-semibold mb-3 uppercase text-sm tracking-wider">Category</h3>
         <div className="space-y-2">
-          {categories.map(category => (
+          {categories.map((category) => (
             <label key={category.value} className="flex items-center gap-2 cursor-pointer">
               <input
                 type="radio"
                 name="category"
                 value={category.value}
                 checked={searchParams.get('category') === category.value}
-                onChange={(e) => updateFilter('category', e.target.checked ? category.value : '')}
+                onChange={() => updateFilter('category', category.value)}
                 className="text-accent-gold focus:ring-accent-gold"
               />
               <span className="text-sm">{category.label}</span>
@@ -92,7 +103,7 @@ const ProductFilters = () => {
       <div>
         <h3 className="font-semibold mb-3 uppercase text-sm tracking-wider">Price Range</h3>
         <div className="space-y-2">
-          {priceRanges.map(range => {
+          {priceRanges.map((range) => {
             const [min, max] = range.value.split('-');
             return (
               <label key={range.value} className="flex items-center gap-2 cursor-pointer">
@@ -101,7 +112,7 @@ const ProductFilters = () => {
                   name="priceRange"
                   value={range.value}
                   checked={
-                    searchParams.get('minPrice') === min && 
+                    searchParams.get('minPrice') === min &&
                     (max ? searchParams.get('maxPrice') === max : !searchParams.get('maxPrice'))
                   }
                   onChange={(e) => {
@@ -135,12 +146,32 @@ const ProductFilters = () => {
           className="w-full input-field"
         >
           <option value="">All Genres</option>
-          {genres.map(genre => (
+          {genres.map((genre) => (
             <option key={genre} value={genre.toLowerCase()}>
               {genre}
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Status Filter */}
+      <div>
+        <h3 className="font-semibold mb-3 uppercase text-sm tracking-wider">Status</h3>
+        <div className="space-y-2">
+          {statuses.map((status) => (
+            <label key={status.value} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="status"
+                value={status.value}
+                checked={searchParams.get('status') === status.value}
+                onChange={(e) => updateFilter('status', e.target.checked ? status.value : '')}
+                className="text-accent-gold focus:ring-accent-gold"
+              />
+              <span className="text-sm">{status.label}</span>
+            </label>
+          ))}
+        </div>
       </div>
 
       {/* Stock Filter */}

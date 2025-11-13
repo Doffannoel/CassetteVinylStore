@@ -5,25 +5,19 @@ import Footer from '@/components/layout/Footer';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Cassette Store - Vinyl, CD & Cassette Shop',
+  title: 'Hysteria Music - Vinyl, CD & Cassette Shop',
   description: 'Toko musik terlengkap untuk vinyl, CD, dan kaset',
   keywords: 'vinyl, CD, cassette, kaset, musik, toko musik',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="id">
       <body suppressHydrationWarning className="flex flex-col min-h-screen">
         <Header />
-        <main className="flex-1">
-          {children}
-        </main>
+        <main className="flex-1">{children}</main>
         <Footer />
-        <Toaster 
+        <Toaster
           position="bottom-right"
           toastOptions={{
             style: {
@@ -42,3 +36,8 @@ export default function RootLayout({
     </html>
   );
 }
+<script
+  type="text/javascript"
+  src="https://app.sandbox.midtrans.com/snap/snap.js"
+  data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
+/>;

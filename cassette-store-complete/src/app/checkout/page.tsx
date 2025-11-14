@@ -1,32 +1,50 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { useCartStore } from '@/store/cartStore';
+import useCartStore from '@/store/cartStore';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { user, loading } = useAuth();
-  const { items, totalPrice, clearCart } = useCartStore();
+  const { user, isLoading } = useAuth();
+  const { items, getTotalAmount, clearCart } = useCartStore();
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Redirect jika belum login
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push(`/login?next=/checkout`);
-    }
-  }, [user, loading, router]);
+  const totalPrice = getTotalAmount();
 
+  // ❌ HAPUS INI - Middleware sudah handle
+  // useEffect(() => {
+  //   if (!isLoading && !user) {
+  //     router.push(`/login?redirect=/checkout`);
+  //   }
+  // }, [user, isLoading, router]);
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="container py-12 text-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-gold"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Empty cart
   if (!items.length) {
     return (
       <div className="container py-12 text-center">
         <h1 className="text-3xl font-heading mb-3">Keranjang Kosong</h1>
         <p className="text-gray-600 mb-8">Tambahkan produk ke keranjang terlebih dahulu.</p>
-        <a href="/" className="btn-primary inline-block px-6 py-3 rounded-md">
+        <button
+          onClick={() => router.push('/products')}
+          className="btn-primary inline-block px-6 py-3 rounded-md"
+        >
           Lanjut Belanja
-        </a>
+        </button>
       </div>
     );
   }
@@ -41,9 +59,9 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: items.map((item) => ({
-            id: item._id,
-            name: item.name,
-            price: item.price,
+            id: item.product._id,
+            name: item.product.name,
+            price: item.product.price,
             quantity: item.quantity,
           })),
           total: totalPrice,
@@ -58,7 +76,7 @@ export default function CheckoutPage() {
       }
 
       // Panggil Midtrans Snap popup
-      window.snap?.pay(data.snapToken, {
+      (window as any).snap?.pay(data.snapToken, {
         onSuccess: () => {
           clearCart();
           router.push('/success');
@@ -86,17 +104,17 @@ export default function CheckoutPage() {
         <div className="md:col-span-2 space-y-4">
           {items.map((item) => (
             <div
-              key={item._id}
+              key={item.product._id}
               className="flex justify-between items-center border-b border-gray-200 pb-3"
             >
               <div>
-                <h3 className="font-semibold text-lg">{item.name}</h3>
+                <h3 className="font-semibold text-lg">{item.product.name}</h3>
                 <p className="text-sm text-gray-600">
-                  {item.quantity} x Rp {item.price.toLocaleString('id-ID')}
+                  {item.quantity} x Rp {item.product.price.toLocaleString('id-ID')}
                 </p>
               </div>
               <span className="font-semibold text-accent-gold">
-                Rp {(item.price * item.quantity).toLocaleString('id-ID')}
+                Rp {(item.product.price * item.quantity).toLocaleString('id-ID')}
               </span>
             </div>
           ))}

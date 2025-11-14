@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { Product } from '@/types';
 import useCartStore from '@/store/cartStore';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   ShoppingBag,
   ChevronLeft,
@@ -16,6 +16,7 @@ import {
   Truck,
   Shield,
   RotateCcw,
+  LogIn,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ProductCard from '@/components/products/ProductCard';
@@ -24,12 +25,14 @@ export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { addItem } = useCartStore();
+  const { isAuthenticated, user } = useAuth();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -71,8 +74,15 @@ export default function ProductDetailPage() {
     }
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
+
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      setShowLoginPrompt(true);
+      toast.error('Please login to add items to cart');
+      return;
+    }
 
     if (product.stock === 0) {
       toast.error('Product is out of stock');
@@ -84,8 +94,12 @@ export default function ProductDetailPage() {
       return;
     }
 
-    addItem(product, quantity);
-    toast.success(`${quantity} × ${product.name} added to cart`);
+    try {
+      await addItem(product, quantity);
+      toast.success(`${quantity} × ${product.name} added to cart`);
+    } catch (error) {
+      toast.error('Failed to add item to cart');
+    }
   };
 
   const formatPrice = (price: number) => {
@@ -121,6 +135,35 @@ export default function ProductDetailPage() {
 
   return (
     <div className="container py-8">
+      {/* Login Prompt Modal */}
+      {showLoginPrompt && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <LogIn className="text-accent-gold" size={24} />
+              <h3 className="text-xl font-heading">Login Required</h3>
+            </div>
+            <p className="text-text-body mb-6">
+              You need to login to add items to your cart. Your cart will be saved and synced across devices.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => {
+                const currentPath = window.location.pathname;
+                router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
+              }}>
+                Login
+              </button>
+              <button
+                onClick={() => setShowLoginPrompt(false)}
+                className="flex-1 px-6 py-3 border border-neutral-divider hover:bg-neutral-card transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-text-body mb-6">
         <button onClick={() => router.push('/products')} className="hover:text-accent-gold">
@@ -162,9 +205,8 @@ export default function ProductDetailPage() {
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`w-20 h-20 flex-shrink-0 border-2 ${
-                    selectedImage === index ? 'border-accent-gold' : 'border-neutral-divider'
-                  }`}
+                  className={`w-20 h-20 flex-shrink-0 border-2 ${selectedImage === index ? 'border-accent-gold' : 'border-neutral-divider'
+                    }`}
                 >
                   <img
                     src={image}
@@ -248,6 +290,21 @@ export default function ProductDetailPage() {
             ) : null}
           </div>
 
+          {/* Auth Warning for Guest Users */}
+          {!isAuthenticated && product.status === 'for_sale' && product.stock > 0 && (
+            <div className="mb-4 bg-blue-50 border-l-4 border-blue-500 p-4">
+              <div className="flex items-start gap-2">
+                <LogIn className="text-blue-600 flex-shrink-0 mt-0.5" size={18} />
+                <div>
+                  <p className="text-sm text-blue-800 font-semibold">Login to add to cart</p>
+                  <p className="text-xs text-blue-700 mt-1">
+                    Your cart will be saved and synced across all your devices
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Quantity & Add to Cart */}
           {product.status === 'for_sale' ? (
             product.stock > 0 ? (
@@ -282,7 +339,7 @@ export default function ProductDetailPage() {
                   className="btn-primary flex-1 flex items-center justify-center gap-2"
                 >
                   <ShoppingBag size={20} />
-                  Add to Cart
+                  {isAuthenticated ? 'Add to Cart' : 'Login to Add to Cart'}
                 </button>
               </div>
             ) : (

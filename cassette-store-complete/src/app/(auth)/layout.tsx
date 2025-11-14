@@ -3,7 +3,7 @@ export default function AuthLayout({
 }: {
     children: React.ReactNode;
 }) {
-    console.log("AUTH LAYOUT AKTIF");
+    // console.log("AUTH LAYOUT AKTIF");
 
     return (
         <div className="min-h-screen flex flex-col">

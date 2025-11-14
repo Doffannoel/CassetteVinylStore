@@ -15,6 +15,11 @@ export async function POST(req: Request) {
     if (!ok) return NextResponse.json({ success: false, error: 'Invalid credentials' }, { status: 401 });
 
     const token = signToken({ _id: user._id.toString(), email: user.email, role: user.role, name: user.name });
+    
+    // ✅ TAMBAH INI - Debug cookie
+    console.log('🍪 TOKEN GENERATED:', token.substring(0, 20) + '...');
+    console.log('🍪 COOKIE HEADER:', authCookieHeader(token));
+    
     return new NextResponse(JSON.stringify({ success: true, data: { name: user.name, email: user.email, role: user.role } }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', ...authCookieHeader(token) },

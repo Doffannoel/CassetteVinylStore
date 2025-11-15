@@ -3,7 +3,8 @@ import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
 
 // PUT /api/orders/[id]/pickup - Confirm order pickup
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const params = await context.params;
   try {
     // Check admin authentication
     const authHeader = request.headers.get('authorization');

@@ -154,8 +154,9 @@ export async function POST(request: NextRequest) {
       totalAmount += product.price * item.quantity;
     }
 
-    // Generate order ID
+    // Generate order ID and pickup code
     const orderId = Order.generateOrderId();
+    const pickupCode = Order.generatePickupCode();
 
     // Create order
     const order = await Order.create({
@@ -165,6 +166,7 @@ export async function POST(request: NextRequest) {
       totalAmount,
       status: 'pending',
       paymentStatus: 'pending',
+      pickupCode,
     });
 
     // Reduce stock for each product

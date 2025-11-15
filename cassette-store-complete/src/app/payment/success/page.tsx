@@ -33,12 +33,44 @@ export default function PaymentSuccessPage() {
       const data = await response.json();
 
       if (data.success && data.data) {
+        console.log('Fetched order data:', data.data);
+        console.log('Fetched order _id:', data.data._id);
         setOrder(data.data);
+        // After successfully fetching order details, update product stock
+        updateProductStock(data.data.items);
       }
     } catch (error) {
       console.error('Error fetching order:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateProductStock = async (items: any[]) => {
+    try {
+      const productsToUpdate = items.map((item) => ({
+        productId: (item.product as Product)._id,
+        quantity: item.quantity,
+      }));
+
+      const response = await fetch('/api/products/update-stock', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ items: productsToUpdate }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Failed to update product stock:', errorData.message);
+        toast.error('Gagal mengurangi stok produk.');
+      } else {
+        console.log('Product stock updated successfully.');
+      }
+    } catch (error) {
+      console.error('Error updating product stock:', error);
+      toast.error('Terjadi kesalahan saat mengurangi stok produk.');
     }
   };
 
@@ -108,6 +140,39 @@ export default function PaymentSuccessPage() {
     if (order?.pickupCode) {
       navigator.clipboard.writeText(order.pickupCode);
       toast.success('Kode pickup berhasil disalin!');
+    }
+  };
+
+  const downloadInvoice = async (orderId: string) => {
+    try {
+      console.log('Downloading invoice for order ID:', orderId);
+      const response = await fetch(`/api/orders/${orderId}/invoice`, {
+        method: 'GET',
+        credentials: 'include', // Send cookies for authentication
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error Response:', errorText);
+        toast.error('Failed to download invoice');
+        return;
+      }
+
+      // Get the PDF blob
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `invoice-${orderId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast.success('Invoice downloaded successfully as PDF');
+    } catch (error) {
+      console.error('Download invoice error:', error);
+      toast.error('Failed to download invoice');
     }
   };
 
@@ -234,7 +299,7 @@ export default function PaymentSuccessPage() {
                 Telp: {process.env.NEXT_PUBLIC_STORE_PHONE || '021-12345678'}
               </p>
               <p className="text-sm text-text-body mt-3">
-                Jam operasional: Senin-Sabtu 10:00-21:00, Minggu 10:00-20:00
+                Jam operasional: Senin-Sabtu 11:00-20:00
               </p>
             </div>
 
@@ -269,6 +334,12 @@ export default function PaymentSuccessPage() {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={() => order && downloadInvoice(order._id!)}
+            className="btn-secondary flex-1"
+          >
+            Download Invoice
+          </button>
           <button onClick={() => router.push('/products')} className="btn-secondary flex-1">
             Lanjut Belanja
           </button>

@@ -37,6 +37,7 @@ export interface IOrder extends Document {
   completedAt?: Date;
   cancelledAt?: Date;
   pickupStatus?: 'pending' | 'picked_up';
+  pickupCode?: string;
   pickedUpBy?: string;
   pickedUpAt?: Date;
   createdAt: Date;
@@ -152,6 +153,7 @@ const OrderSchema = new Schema<IOrder, IOrderModel>(
     shippedAt: Date,
     completedAt: Date,
     cancelledAt: Date,
+    pickupCode: String,
   },
   {
     timestamps: true,
@@ -178,6 +180,11 @@ OrderSchema.statics.generateOrderId = function () {
     .toString()
     .padStart(4, '0');
   return `ORD-${year}${month}${day}-${random}`;
+};
+
+// Generate unique 6-digit pickup code
+OrderSchema.statics.generatePickupCode = function (): string {
+  return Math.floor(100000 + Math.random() * 900000).toString(); // Generates a 6-digit number
 };
 
 // Get orders by status

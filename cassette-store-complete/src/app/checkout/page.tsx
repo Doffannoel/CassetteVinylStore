@@ -11,6 +11,7 @@ export default function CheckoutPage() {
   const { user, isLoading } = useAuth();
   const { items, getTotalAmount, clearCart } = useCartStore();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [phone, setPhone] = useState('');
 
   const totalPrice = getTotalAmount();
 
@@ -50,21 +51,28 @@ export default function CheckoutPage() {
   }
 
   const handleCheckout = async () => {
+    if (!phone) {
+      toast.error('Harap isi nomor telepon.');
+      return;
+    }
+
     try {
       setIsProcessing(true);
       toast.loading('Memproses pesanan...');
 
-      const res = await fetch('/api/order', {
+      const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: items.map((item) => ({
-            id: item.product._id,
-            name: item.product.name,
-            price: item.product.price,
+            productId: item.product._id,
             quantity: item.quantity,
           })),
-          total: totalPrice,
+          customerInfo: {
+            name: user?.name,
+            email: user?.email,
+            phone,
+          },
         }),
       });
 
@@ -79,14 +87,57 @@ export default function CheckoutPage() {
       (window as any).snap?.pay(data.snapToken, {
         onSuccess: () => {
           clearCart();
-          router.push('/success');
+          router.push(`/payment/success?orderId=${data.data.orderId}`);
         },
         onPending: () => {
-          router.push('/success');
+          router.push(`/payment/success?orderId=${data.data.orderId}`);
         },
         onError: () => toast.error('Pembayaran gagal.'),
         onClose: () => toast('Pembayaran dibatalkan.'),
       });
+    } catch (err: any) {
+      toast.dismiss();
+      toast.error(err.message || 'Terjadi kesalahan saat checkout.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handlePayAtStore = async () => {
+    if (!phone) {
+      toast.error('Harap isi nomor telepon.');
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      toast.loading('Memproses pesanan...');
+
+      const res = await fetch('/api/orders/pay-at-store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: items.map((item) => ({
+            productId: item.product._id,
+            quantity: item.quantity,
+          })),
+          customerInfo: {
+            name: user?.name,
+            email: user?.email,
+            phone,
+          },
+        }),
+      });
+
+      toast.dismiss();
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Gagal membuat pesanan');
+      }
+
+      clearCart();
+      router.push(`/payment/success?orderId=${data.data.orderId}`);
     } catch (err: any) {
       toast.dismiss();
       toast.error(err.message || 'Terjadi kesalahan saat checkout.');
@@ -100,28 +151,50 @@ export default function CheckoutPage() {
       <h1 className="text-3xl font-heading mb-8 text-center md:text-left">Checkout</h1>
 
       <div className="grid md:grid-cols-3 gap-8">
-        {/* Daftar Produk */}
-        <div className="md:col-span-2 space-y-4">
-          {items.map((item) => (
-            <div
-              key={item.product._id}
-              className="flex justify-between items-center border-b border-gray-200 pb-3"
-            >
-              <div>
-                <h3 className="font-semibold text-lg">{item.product.name}</h3>
-                <p className="text-sm text-gray-600">
-                  {item.quantity} x Rp {item.product.price.toLocaleString('id-ID')}
-                </p>
+        <div className="md:col-span-2 space-y-8">
+          {/* Daftar Produk */}
+          <div className="space-y-4">
+            {items.map((item) => (
+              <div
+                key={item.product._id}
+                className="flex justify-between items-center border-b border-gray-200 pb-3"
+              >
+                <div>
+                  <h3 className="font-semibold text-lg">{item.product.name}</h3>
+                  <p className="text-sm text-gray-600">
+                    {item.quantity} x Rp {item.product.price.toLocaleString('id-ID')}
+                  </p>
+                </div>
+                <span className="font-semibold text-accent-gold">
+                  Rp {(item.product.price * item.quantity).toLocaleString('id-ID')}
+                </span>
               </div>
-              <span className="font-semibold text-accent-gold">
-                Rp {(item.product.price * item.quantity).toLocaleString('id-ID')}
-              </span>
+            ))}
+          </div>
+
+          {/* Informasi Pengiriman */}
+          <div className="space-y-4 border rounded-lg p-6 bg-gray-50 shadow-sm">
+            <h2 className="text-xl font-heading mb-4">Informasi Pengiriman</h2>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                  Nomor Telepon
+                </label>
+                <input
+                  type="tel"
+                  id="phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent-gold focus:border-accent-gold sm:text-sm"
+                  required
+                />
+              </div>
             </div>
-          ))}
+          </div>
         </div>
 
         {/* Ringkasan Pembayaran */}
-        <div className="border rounded-lg p-6 bg-gray-50 shadow-sm">
+        <div className="border rounded-lg p-6 bg-gray-50 shadow-sm h-fit">
           <h2 className="text-xl font-heading mb-4">Ringkasan Pembayaran</h2>
 
           <div className="flex justify-between mb-2">
@@ -139,12 +212,31 @@ export default function CheckoutPage() {
             <span className="text-accent-gold">Rp {totalPrice.toLocaleString('id-ID')}</span>
           </div>
 
+          <div className="mt-6 border-t pt-4">
+            <h3 className="text-lg font-semibold mb-2">Opsi Pembayaran</h3>
+            <div className="text-sm text-gray-600 space-y-2">
+              <p>
+                <strong>Bayar Sekarang:</strong> Lakukan pembayaran online melalui Midtrans. Anda akan menerima bukti pembayaran via WhatsApp untuk ditunjukkan di toko.
+              </p>
+              <p>
+                <strong>Bayar di Tempat:</strong> Pesan sekarang dan bayar tunai saat Anda mengambil barang di toko. Anda akan menerima bukti pre-order via WhatsApp.
+              </p>
+            </div>
+          </div>
+
           <button
             onClick={handleCheckout}
             disabled={isProcessing}
             className="btn-primary w-full mt-6 py-3 rounded-md disabled:opacity-60"
           >
             {isProcessing ? 'Memproses...' : 'Bayar Sekarang'}
+          </button>
+          <button
+            onClick={handlePayAtStore}
+            disabled={isProcessing}
+            className="btn-secondary w-full mt-2 py-3 rounded-md disabled:opacity-60"
+          >
+            {isProcessing ? 'Memproses...' : 'Bayar di Tempat'}
           </button>
         </div>
       </div>

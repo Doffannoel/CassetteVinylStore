@@ -15,9 +15,6 @@ export interface IOrder extends Document {
     name: string;
     email: string;
     phone: string;
-    address: string;
-    city: string;
-    postalCode: string;
   };
   totalAmount: number;
   status:
@@ -74,21 +71,7 @@ const CustomerInfoSchema = new Schema(
       required: true,
       trim: true,
     },
-    address: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    city: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    postalCode: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+
   },
   { _id: false }
 );

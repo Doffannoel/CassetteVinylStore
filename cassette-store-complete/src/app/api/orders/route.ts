@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
+import midtransClient from 'midtrans-client';
+
+// Initialize Midtrans Snap API
+const snap = new midtransClient.Snap({
+  isProduction: process.env.NODE_ENV === 'production',
+  serverKey: process.env.MIDTRANS_SERVER_KEY,
+  clientKey: process.env.MIDTRANS_CLIENT_KEY,
+});
 
 // GET /api/orders - Get all orders (Admin only)
 export async function GET(request: NextRequest) {
@@ -97,7 +105,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!customerInfo || !customerInfo.name || !customerInfo.email || !customerInfo.phone || !customerInfo.address) {
+    if (!customerInfo || !customerInfo.name || !customerInfo.email || !customerInfo.phone) {
       return NextResponse.json(
         {
           success: false,
@@ -172,10 +180,36 @@ export async function POST(request: NextRequest) {
     // Populate product details for response
     const populatedOrder = await Order.findById(order._id).populate('items.product');
 
+    // Create Midtrans transaction
+    const transactionDetails = {
+      transaction_details: {
+        order_id: populatedOrder.orderId,
+        gross_amount: populatedOrder.totalAmount,
+      },
+      customer_details: {
+        first_name: populatedOrder.customerInfo.name,
+        email: populatedOrder.customerInfo.email,
+        phone: populatedOrder.customerInfo.phone,
+      },
+      item_details: populatedOrder.items.map((item) => ({
+        id: item.product._id.toString(),
+        price: item.price,
+        quantity: item.quantity,
+        name: item.name,
+      })),
+    };
+
+    const snapToken = await snap.createTransactionToken(transactionDetails);
+
+    // Save Midtrans token to order
+    populatedOrder.midtransToken = snapToken;
+    await populatedOrder.save();
+
     return NextResponse.json(
       {
         success: true,
         data: populatedOrder,
+        snapToken,
         message: 'Order created successfully',
       },
       { status: 201 }

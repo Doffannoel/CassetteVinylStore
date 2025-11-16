@@ -11,76 +11,62 @@ const snap = new midtransClient.Snap({
   clientKey: process.env.MIDTRANS_CLIENT_KEY,
 });
 
-// GET /api/orders - Get all orders (Admin only)
+import { verifyToken, JWTPayload } from '@/utils/auth';
+import { cookies } from 'next/headers';
+
+// GET /api/orders - Get orders for the logged-in user OR all orders for admin
 export async function GET(request: NextRequest) {
   try {
-    // Check admin authentication
+    await connectDB();
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth_token')?.value;
+    const user = verifyToken<JWTPayload>(token);
+
+    // Admin access (for admin dashboard)
     const authHeader = request.headers.get('authorization');
     const adminPassword = process.env.ADMIN_PASSWORD;
+    const isAdminAccess = authHeader === `Bearer ${adminPassword}`;
 
-    if (!authHeader || authHeader !== `Bearer ${adminPassword}`) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Unauthorized',
-        },
-        { status: 401 }
-      );
-    }
+    if (isAdminAccess) {
+      const searchParams = request.nextUrl.searchParams;
+      const page = parseInt(searchParams.get('page') || '1');
+      const limit = parseInt(searchParams.get('limit') || '20');
+      const status = searchParams.get('status');
+      const email = searchParams.get('email');
+      const query: any = {};
+      if (status) query.status = status;
+      if (email) query['customerInfo.email'] = new RegExp(email, 'i');
+      
+      const skip = (page - 1) * limit;
+      const [orders, totalCount] = await Promise.all([
+        Order.find(query).populate('items.product').sort('-createdAt').skip(skip).limit(limit).lean(),
+        Order.countDocuments(query),
+      ]);
+      const totalPages = Math.ceil(totalCount / limit);
 
-    await connectDB();
-
-    const searchParams = request.nextUrl.searchParams;
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
-    const status = searchParams.get('status');
-    const email = searchParams.get('email');
-
-    // Build query
-    const query: any = {};
-
-    if (status) {
-      query.status = status;
-    }
-
-    if (email) {
-      query['customerInfo.email'] = new RegExp(email, 'i');
-    }
-
-    const skip = (page - 1) * limit;
-
-    const [orders, totalCount] = await Promise.all([
-      Order.find(query)
-        .populate('items.product')
-        .sort('-createdAt')
-        .skip(skip)
-        .limit(limit)
-        .lean(),
-      Order.countDocuments(query),
-    ]);
-
-    const totalPages = Math.ceil(totalCount / limit);
-
-    return NextResponse.json({
-      success: true,
-      data: {
+      return NextResponse.json({
+        success: true,
         orders,
-        pagination: {
-          currentPage: page,
-          totalPages,
-          totalCount,
-          limit,
-        },
-      },
-    });
+        pagination: { currentPage: page, totalPages, totalCount, limit },
+      });
+    }
+
+    // Regular user access
+    if (!user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const orders = await Order.find({ 'customerInfo.email': user.email })
+      .populate('items.product')
+      .sort('-createdAt')
+      .lean();
+
+    return NextResponse.json({ success: true, orders });
+
   } catch (error: any) {
     console.error('Error fetching orders:', error);
     return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to fetch orders',
-        message: error.message,
-      },
+      { success: false, error: 'Failed to fetch orders', message: error.message },
       { status: 500 }
     );
   }
@@ -168,16 +154,6 @@ export async function POST(request: NextRequest) {
       paymentStatus: 'pending',
       pickupCode,
     });
-
-    // Reduce stock for each product
-    for (const item of items) {
-      await Product.findByIdAndUpdate(item.productId, {
-        $inc: { 
-          stock: -item.quantity,
-          soldCount: item.quantity,
-        },
-      });
-    }
 
     // Populate product details for response
     const populatedOrder = await Order.findById(order._id).populate('items.product');

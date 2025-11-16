@@ -87,10 +87,10 @@ export default function CheckoutPage() {
       (window as any).snap?.pay(data.snapToken, {
         onSuccess: () => {
           clearCart();
-          router.push(`/payment/success?orderId=${data.data.orderId}`);
+          router.push(`/orders/${data.data.orderId}`);
         },
         onPending: () => {
-          router.push(`/payment/success?orderId=${data.data.orderId}`);
+          router.push(`/orders/${data.data.orderId}`);
         },
         onError: () => toast.error('Pembayaran gagal.'),
         onClose: () => toast('Pembayaran dibatalkan.'),
@@ -137,7 +137,7 @@ export default function CheckoutPage() {
       }
 
       clearCart();
-      router.push(`/payment/success?orderId=${data.data.orderId}`);
+      router.push(`/orders/${data.data.orderId}`);
     } catch (err: any) {
       toast.dismiss();
       toast.error(err.message || 'Terjadi kesalahan saat checkout.');

@@ -3,6 +3,7 @@ import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
 import midtransClient from 'midtrans-client';
+import { verifyToken, JWTPayload } from '@/utils/auth';
 
 // Initialize Midtrans Snap API
 const snap = new midtransClient.Snap({
@@ -11,62 +12,103 @@ const snap = new midtransClient.Snap({
   clientKey: process.env.MIDTRANS_CLIENT_KEY,
 });
 
-import { verifyToken, JWTPayload } from '@/utils/auth';
-import { cookies } from 'next/headers';
-
 // GET /api/orders - Get orders for the logged-in user OR all orders for admin
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth_token')?.value;
-    const user = verifyToken<JWTPayload>(token);
 
-    // Admin access (for admin dashboard)
-    const authHeader = request.headers.get('authorization');
-    const adminPassword = process.env.ADMIN_PASSWORD;
-    const isAdminAccess = authHeader === `Bearer ${adminPassword}`;
+    // Check authentication
+    const token = request.cookies.get('auth_token')?.value;
 
-    if (isAdminAccess) {
+    if (!token) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Unauthorized - No token provided',
+        },
+        { status: 401 }
+      );
+    }
+
+    // Verify JWT token
+    const payload = verifyToken<JWTPayload>(token);
+
+    if (!payload) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Unauthorized - Invalid token',
+        },
+        { status: 401 }
+      );
+    }
+
+    // Admin access - get all orders with pagination and filters
+    if (payload.role === 'admin') {
       const searchParams = request.nextUrl.searchParams;
       const page = parseInt(searchParams.get('page') || '1');
       const limit = parseInt(searchParams.get('limit') || '20');
       const status = searchParams.get('status');
       const email = searchParams.get('email');
+
+      // Build query
       const query: any = {};
-      if (status) query.status = status;
-      if (email) query['customerInfo.email'] = new RegExp(email, 'i');
-      
+      if (status) {
+        query.status = status;
+      }
+      if (email) {
+        query['customerInfo.email'] = new RegExp(email, 'i');
+      }
+
       const skip = (page - 1) * limit;
+
       const [orders, totalCount] = await Promise.all([
-        Order.find(query).populate('items.product').sort('-createdAt').skip(skip).limit(limit).lean(),
+        Order.find(query)
+          .populate('items.product')
+          .sort('-createdAt')
+          .skip(skip)
+          .limit(limit)
+          .lean(),
         Order.countDocuments(query),
       ]);
+
       const totalPages = Math.ceil(totalCount / limit);
 
       return NextResponse.json({
         success: true,
-        orders,
-        pagination: { currentPage: page, totalPages, totalCount, limit },
+        data: {
+          orders,
+          pagination: {
+            currentPage: page,
+            totalPages,
+            totalCount,
+            limit,
+          },
+        },
       });
     }
 
-    // Regular user access
-    if (!user) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const orders = await Order.find({ 'customerInfo.email': user.email })
+    // Regular user access - get only their orders
+    const orders = await Order.find({ 'customerInfo.email': payload.email })
       .populate('items.product')
       .sort('-createdAt')
       .lean();
 
-    return NextResponse.json({ success: true, orders });
+    return NextResponse.json({
+      success: true,
+      data: {
+        orders,
+      },
+    });
 
   } catch (error: any) {
     console.error('Error fetching orders:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch orders', message: error.message },
+      {
+        success: false,
+        error: 'Failed to fetch orders',
+        message: error.message,
+      },
       { status: 500 }
     );
   }
@@ -140,23 +182,43 @@ export async function POST(request: NextRequest) {
       totalAmount += product.price * item.quantity;
     }
 
-    // Generate order ID and pickup code
-    const orderId = Order.generateOrderId();
-    const pickupCode = Order.generatePickupCode();
-
-    // Create order
+    // Create order first without orderId and pickupCode
     const order = await Order.create({
-      orderId,
       items: orderItems,
       customerInfo,
       totalAmount,
       status: 'pending',
       paymentStatus: 'pending',
-      pickupCode,
     });
+
+    // Generate orderId and pickupCode using instance methods
+    order.orderId = order.generateOrderId();
+    order.pickupCode = order.generatePickupCode();
+    await order.save();
+
+    // Reduce stock for each product
+    for (const item of items) {
+      await Product.findByIdAndUpdate(item.productId, {
+        $inc: { 
+          stock: -item.quantity,
+          soldCount: item.quantity,
+        },
+      });
+    }
 
     // Populate product details for response
     const populatedOrder = await Order.findById(order._id).populate('items.product');
+
+    // Add null check for populatedOrder
+    if (!populatedOrder) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Failed to retrieve order details',
+        },
+        { status: 500 }
+      );
+    }
 
     // Create Midtrans transaction
     const transactionDetails = {
@@ -169,7 +231,7 @@ export async function POST(request: NextRequest) {
         email: populatedOrder.customerInfo.email,
         phone: populatedOrder.customerInfo.phone,
       },
-      item_details: populatedOrder.items.map((item) => ({
+      item_details: populatedOrder.items.map((item: any) => ({
         id: item.product._id.toString(),
         price: item.price,
         quantity: item.quantity,

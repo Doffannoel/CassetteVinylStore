@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Order } from '@/types';
-import { Loader2, Eye, Package, Truck, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, Eye, Package, Ban, CheckCircle, XCircle, Clock, AlertCircle, DollarSign, RefreshCw, Banknote, Smartphone } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const AdminOrderList = () => {
@@ -99,6 +99,100 @@ const AdminOrderList = () => {
     }
   };
 
+  const getPaymentStatusIcon = (paymentStatus: string) => {
+    switch (paymentStatus) {
+      case 'pending':
+        return <Clock className="w-4 h-4" />;
+      case 'paid':
+        return <CheckCircle className="w-4 h-4" />;
+      case 'settlement':
+        return <CheckCircle className="w-4 h-4" />;
+      case 'capture':
+        return <DollarSign className="w-4 h-4" />;
+      case 'failed':
+        return <XCircle className="w-4 h-4" />;
+      case 'deny':
+        return <XCircle className="w-4 h-4" />;
+      case 'failure':
+        return <XCircle className="w-4 h-4" />;
+      case 'cancelled':
+        return <Ban className="w-4 h-4" />;
+      case 'cancel':
+        return <Ban className="w-4 h-4" />;
+      case 'expired':
+        return <AlertCircle className="w-4 h-4" />;
+      case 'expire':
+        return <AlertCircle className="w-4 h-4" />;
+      case 'refund':
+        return <RefreshCw className="w-4 h-4" />;
+      case 'partial_refund':
+        return <RefreshCw className="w-4 h-4" />;
+      default:
+        return <Clock className="w-4 h-4" />;
+    }
+  };
+
+  const getPaymentStatusColor = (paymentStatus: string) => {
+    switch (paymentStatus) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'paid':
+      case 'settlement':
+      case 'capture':
+        return 'bg-green-100 text-green-800';
+      case 'failed':
+      case 'deny':
+      case 'failure':
+        return 'bg-red-100 text-red-800';
+      case 'cancelled':
+      case 'cancel':
+        return 'bg-gray-100 text-gray-800';
+      case 'expired':
+      case 'expire':
+        return 'bg-orange-100 text-orange-800';
+      case 'refund':
+      case 'partial_refund':
+        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getPaymentMethodIcon = (paymentMethod: string) => {
+    const method = paymentMethod?.toLowerCase() || '';
+
+    switch (method) {
+      case 'pay at store':
+        return <Banknote className="w-4 h-4" />;
+      default:
+        return <Smartphone className="w-4 h-4" />;
+    }
+  };
+
+  const getPaymentMethodColor = (paymentMethod: string) => {
+    const method = paymentMethod?.toLowerCase() || '';
+
+    switch (method) {
+      case 'pay at store':
+        return 'bg-green-100 text-green-800';
+
+      default:
+        return 'bg-blue-100 text-blue-800';
+    }
+  };
+
+  const getPaymentMethodLabel = (paymentMethod?: string) => {
+    const method = (paymentMethod || 'unknown').toLowerCase();
+
+    switch (method) {
+      case 'pay at store':
+        return 'Pay at Store';
+
+      default:
+        return 'Virtual/Online';
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-20">
@@ -130,6 +224,12 @@ const AdminOrderList = () => {
                   Total
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                  Payment Method
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                  Payment Status
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">
                   Status
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">
@@ -157,6 +257,19 @@ const AdminOrderList = () => {
                   </td>
                   <td className="px-4 py-3 font-medium">
                     {formatPrice(order.totalAmount)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`badge ${getPaymentMethodColor(order.paymentMethod)} flex items-center gap-1`}>
+                      {getPaymentMethodIcon(order.paymentMethod)}
+                      {getPaymentMethodLabel(order.paymentMethod)}
+
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`badge ${getPaymentStatusColor(order.paymentStatus)} flex items-center gap-1`}>
+                      {getPaymentStatusIcon(order.paymentStatus)}
+                      {order.paymentStatus}
+                    </span>
                   </td>
                   <td className="px-4 py-3">
                     <span className={`badge ${getStatusColor(order.status)} flex items-center gap-1`}>
@@ -200,7 +313,7 @@ const AdminOrderList = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
             <h3 className="text-xl font-semibold mb-4">Order Details</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <p className="font-medium">Order ID: {selectedOrder.orderId}</p>

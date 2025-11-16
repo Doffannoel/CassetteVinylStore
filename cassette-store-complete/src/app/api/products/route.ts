@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { ProductFilters } from '@/types';
+import { verifyToken, JWTPayload } from '@/utils/auth';
 
 // GET /api/products - Get all products with filters
 export async function GET(request: NextRequest) {
@@ -97,16 +98,39 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Check admin authentication
-    const authHeader = request.headers.get('authorization');
-    const adminPassword = process.env.ADMIN_PASSWORD;
+    const token = request.cookies.get('auth_token')?.value;
 
-    if (!authHeader || authHeader !== `Bearer ${adminPassword}`) {
+    if (!token) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Unauthorized',
+          error: 'Unauthorized - No token provided',
         },
         { status: 401 }
+      );
+    }
+
+    // Verify JWT token
+    const payload = verifyToken<JWTPayload>(token);
+
+    if (!payload) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Unauthorized - Invalid token',
+        },
+        { status: 401 }
+      );
+    }
+
+    // Check if user is admin
+    if (payload.role !== 'admin') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Forbidden - Admin access required',
+        },
+        { status: 403 }
       );
     }
 

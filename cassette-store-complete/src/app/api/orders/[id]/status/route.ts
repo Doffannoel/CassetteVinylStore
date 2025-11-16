@@ -1,24 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
+import { verifyToken, JWTPayload } from '@/utils/auth';
 
 // PUT /api/orders/[id]/status - Update order status (Admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Check admin authentication
-    const authHeader = request.headers.get('authorization');
-    const adminPassword = process.env.ADMIN_PASSWORD;
+    // Await params to unwrap the Promise
+    const { id } = await params;
 
-    if (!authHeader || authHeader !== `Bearer ${adminPassword}`) {
+    // Check admin authentication
+    const token = request.cookies.get('auth_token')?.value;
+
+    if (!token) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Unauthorized',
+          error: 'Unauthorized - No token provided',
         },
         { status: 401 }
+      );
+    }
+
+    // Verify JWT token
+    const payload = verifyToken<JWTPayload>(token);
+
+    if (!payload) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Unauthorized - Invalid token',
+        },
+        { status: 401 }
+      );
+    }
+
+    // Check if user is admin
+    if (payload.role !== 'admin') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Forbidden - Admin access required',
+        },
+        { status: 403 }
       );
     }
 
@@ -36,7 +63,7 @@ export async function PUT(
       );
     }
 
-    const order = await Order.findById(params.id);
+    const order = await Order.findById(id);
 
     if (!order) {
       return NextResponse.json(

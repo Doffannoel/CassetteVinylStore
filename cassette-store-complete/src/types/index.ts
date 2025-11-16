@@ -52,7 +52,6 @@ export interface Order {
     | 'pending'
     | 'processing'
     | 'paid'
-    | 'shipped'
     | 'completed'
     | 'cancelled'
     | 'ready_pickup';
@@ -74,9 +73,6 @@ export interface CustomerInfo {
   name: string;
   email: string;
   phone: string;
-  address: string;
-  city: string;
-  postalCode: string;
 }
 
 // Admin types

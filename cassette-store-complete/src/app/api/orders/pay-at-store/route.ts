@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       items: orderItems,
       customerInfo,
       totalAmount,
-      status: 'processing', // 'processing' because it's ready for pickup
+      status: 'ready_pickup', // Order is immediately ready for pickup
       paymentStatus: 'pending',
       paymentMethod: 'Pay at Store',
       pickupCode,

@@ -21,7 +21,6 @@ export interface IOrder extends Document {
     | 'pending'
     | 'processing'
     | 'paid'
-    | 'shipped'
     | 'completed'
     | 'cancelled'
     | 'refunded'
@@ -32,8 +31,6 @@ export interface IOrder extends Document {
   midtransRedirectUrl?: string;
   midtransTransactionId?: string;
   notes?: string;
-  trackingNumber?: string;
-  shippedAt?: Date;
   completedAt?: Date;
   cancelledAt?: Date;
   pickupStatus?: 'pending' | 'picked_up';
@@ -129,7 +126,6 @@ const OrderSchema = new Schema<IOrder, IOrderModel>(
         'pending',
         'processing',
         'paid',
-        'shipped',
         'completed',
         'cancelled',
         'refunded',
@@ -149,8 +145,6 @@ const OrderSchema = new Schema<IOrder, IOrderModel>(
     midtransRedirectUrl: String,
     midtransTransactionId: String,
     notes: String,
-    trackingNumber: String,
-    shippedAt: Date,
     completedAt: Date,
     cancelledAt: Date,
     pickupCode: String,
@@ -200,7 +194,7 @@ OrderSchema.statics.getRecent = function (limit = 10) {
 // Calculate sales statistics
 OrderSchema.statics.getSalesStats = async function () {
   const stats = await this.aggregate([
-    { $match: { status: { $in: ['paid', 'shipped', 'completed'] } } },
+    { $match: { status: { $in: ['paid', 'completed'] } } },
     {
       $group: {
         _id: null,
@@ -219,7 +213,7 @@ OrderSchema.statics.getSalesByMonth = async function (year: number) {
   const sales = await this.aggregate([
     {
       $match: {
-        status: { $in: ['paid', 'shipped', 'completed'] },
+        status: { $in: ['paid', 'completed'] },
         createdAt: {
           $gte: new Date(`${year}-01-01`),
           $lt: new Date(`${year + 1}-01-01`),
@@ -262,9 +256,7 @@ OrderSchema.statics.getSalesByMonth = async function (year: number) {
 OrderSchema.methods.updateStatus = async function (newStatus: string) {
   this.status = newStatus;
 
-  if (newStatus === 'shipped') {
-    this.shippedAt = new Date();
-  } else if (newStatus === 'completed') {
+  if (newStatus === 'completed') {
     this.completedAt = new Date();
   } else if (newStatus === 'cancelled') {
     this.cancelledAt = new Date();

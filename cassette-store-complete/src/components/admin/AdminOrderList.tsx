@@ -73,8 +73,6 @@ const AdminOrderList = () => {
         return <Package className="w-4 h-4" />;
       case 'paid':
         return <CheckCircle className="w-4 h-4" />;
-      case 'shipped':
-        return <Truck className="w-4 h-4" />;
       case 'completed':
         return <CheckCircle className="w-4 h-4" />;
       case 'cancelled':
@@ -92,8 +90,6 @@ const AdminOrderList = () => {
         return 'bg-blue-100 text-blue-800';
       case 'paid':
         return 'bg-green-100 text-green-800';
-      case 'shipped':
-        return 'bg-purple-100 text-purple-800';
       case 'completed':
         return 'bg-green-100 text-green-800';
       case 'cancelled':
@@ -187,7 +183,6 @@ const AdminOrderList = () => {
                         <option value="pending">Pending</option>
                         <option value="processing">Processing</option>
                         <option value="paid">Paid</option>
-                        <option value="shipped">Shipped</option>
                         <option value="completed">Completed</option>
                         <option value="cancelled">Cancelled</option>
                       </select>
@@ -219,8 +214,6 @@ const AdminOrderList = () => {
                 <p>{selectedOrder.customerInfo.name}</p>
                 <p>{selectedOrder.customerInfo.email}</p>
                 <p>{selectedOrder.customerInfo.phone}</p>
-                <p>{selectedOrder.customerInfo.address}</p>
-                <p>{selectedOrder.customerInfo.city}, {selectedOrder.customerInfo.postalCode}</p>
               </div>
 
               <div>

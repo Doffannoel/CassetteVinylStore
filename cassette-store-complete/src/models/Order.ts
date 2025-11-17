@@ -45,6 +45,7 @@ export interface IOrder extends Document {
 // Define an interface for the Order model that includes static methods
 interface IOrderModel extends Model<IOrder> {
   generateOrderId(): string;
+  generatePickupCode(): string;
   getByStatus(status: string): Promise<IOrder[]>;
   getRecent(limit?: number): Promise<IOrder[]>;
   getSalesStats(): Promise<{ totalSales: number; totalOrders: number; averageOrderValue: number }>;

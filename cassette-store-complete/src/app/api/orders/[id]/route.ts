@@ -6,12 +6,10 @@ import mongoose from 'mongoose';
 // GET /api/orders/[id] - Get single order
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const url = new URL(request.url);
-    const pathSegments = url.pathname.split('/');
-    const id = pathSegments[pathSegments.length - 1];
+    const { id } = await context.params;
     await connectDB();
 
     let order;
@@ -61,12 +59,10 @@ export async function GET(
 // PUT /api/orders/[id] - Update order (Admin only)
 export async function PUT(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const url = new URL(request.url);
-    const pathSegments = url.pathname.split('/');
-    const id = pathSegments[pathSegments.length - 1];
+    const { id } = await context.params;
     // Check admin authentication
     const authHeader = request.headers.get('authorization');
     const adminPassword = process.env.ADMIN_PASSWORD;

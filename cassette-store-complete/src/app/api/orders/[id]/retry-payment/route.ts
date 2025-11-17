@@ -14,9 +14,10 @@ const snap = new midtransClient.Snap({
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const { id } = params;
 
     await connectDB();
@@ -44,12 +45,12 @@ export async function POST(
 
     // Re-check stock availability
     for (const item of order.items) {
-      const product = await Product.findById(item.product._id);
+      const product = item.product as any; // The product is already populated
       if (!product || product.stock < item.quantity) {
         return NextResponse.json(
           {
             success: false,
-            error: `Stok untuk ${item.product.name} tidak mencukupi.`,
+            error: `Stok untuk ${product.name} tidak mencukupi.`,
           },
           { status: 400 }
         );

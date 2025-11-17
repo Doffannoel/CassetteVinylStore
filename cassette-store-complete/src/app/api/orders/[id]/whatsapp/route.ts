@@ -3,8 +3,9 @@ import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
 
 // PUT /api/orders/[id]/whatsapp - Update WhatsApp sent status
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
+    const params = await context.params;
     await connectDB();
 
     const { whatsappSent } = await request.json();

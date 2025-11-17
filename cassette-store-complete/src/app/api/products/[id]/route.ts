@@ -7,14 +7,12 @@ import Product from '@/models/Product';
 // GET /api/products/[id] - Get single product
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
 
-    const url = new URL(request.url);
-    const pathSegments = url.pathname.split('/');
-    const id = pathSegments[pathSegments.length - 1]; // Get the last segment
+    const { id } = await context.params;
 
     const product = await Product.findById(id).lean();
 
@@ -48,7 +46,7 @@ export async function GET(
 // PUT /api/products/[id] - Update product (Admin only)
 export async function PUT(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check admin authentication
@@ -74,9 +72,7 @@ export async function PUT(
     delete body.createdAt;
     delete body.updatedAt;
 
-    const url = new URL(request.url);
-    const pathSegments = url.pathname.split('/');
-    const id = pathSegments[pathSegments.length - 1];
+    const { id } = await context.params;
 
     const product = await Product.findByIdAndUpdate(
       id,
@@ -115,7 +111,7 @@ export async function PUT(
 // DELETE /api/products/[id] - Delete product (Admin only)
 export async function DELETE(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check admin authentication
@@ -134,9 +130,7 @@ export async function DELETE(
 
     await connectDB();
 
-    const url = new URL(request.url);
-    const pathSegments = url.pathname.split('/');
-    const id = pathSegments[pathSegments.length - 1];
+    const { id } = await context.params;
 
     const product = await Product.findByIdAndDelete(id);
 

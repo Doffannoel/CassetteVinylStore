@@ -158,6 +158,17 @@ export async function POST(request: NextRequest) {
     // Populate product details for response
     const populatedOrder = await Order.findById(order._id).populate('items.product');
 
+    if (!populatedOrder) {
+      // This case should ideally not be reached as we just created the order
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Could not find the created order.',
+        },
+        { status: 500 }
+      );
+    }
+
     // Create Midtrans transaction
     const transactionDetails = {
       transaction_details: {

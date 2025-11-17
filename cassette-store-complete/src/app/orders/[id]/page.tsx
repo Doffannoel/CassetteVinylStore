@@ -32,7 +32,9 @@ export default function OrderDetailsPage() {
   useEffect(() => {
     const midtransScriptUrl = 'https://app.sandbox.midtrans.com/snap/snap.js';
 
-    let script = document.querySelector(`script[src="${midtransScriptUrl}"]`);
+    let script: HTMLScriptElement | null = document.querySelector(
+      `script[src="${midtransScriptUrl}"]`
+    );
 
     if (!script) {
       script = document.createElement('script');
@@ -191,7 +193,7 @@ export default function OrderDetailsPage() {
               </span>
               <span
                 className={`px-3 py-1 text-sm font-semibold rounded-full ${getStatusChipColor(
-                  order.paymentStatus
+                  order.paymentStatus ?? ''
                 )}`}
               >
                 Pembayaran: {order.paymentStatus}

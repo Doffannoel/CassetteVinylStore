@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ProductCard from '@/components/products/ProductCard';
 import ProductFilters from '@/components/products/ProductFilters';
 import { Product } from '@/types';
 import { Loader2, Grid, List } from 'lucide-react';
 
-export default function ProductsPage() {
+function ProductsPageContent() {
   const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,14 +19,14 @@ export default function ProductsPage() {
   });
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (page = 1) => {
     setLoading(true);
     try {
       const params = new URLSearchParams(searchParams.toString());
-      params.set('page', pagination.currentPage.toString());
+      params.set('page', page.toString());
       params.set('limit', pagination.limit.toString());
 
-      const response = await fetch(`/api/products?${params}`);
+      const response = await fetch(`/api/products?${params.toString()}`);
       const data = await response.json();
 
       if (data.success) {
@@ -41,8 +41,19 @@ export default function ProductsPage() {
   };
 
   useEffect(() => {
-    fetchProducts();
-  }, [searchParams, pagination.currentPage]);
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    setPagination(p => ({ ...p, currentPage: page }));
+    fetchProducts(page);
+  }, [searchParams]);
+
+  const handlePageChange = (newPage: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', newPage.toString());
+    // The router push will trigger the useEffect
+    window.history.pushState(null, '', `?${params.toString()}`);
+    // We need to manually trigger a re-render as pushState doesn't
+    fetchProducts(newPage);
+  };
 
   return (
     <div className="container py-8">
@@ -107,7 +118,7 @@ export default function ProductsPage() {
               {pagination.totalPages > 1 && (
                 <div className="flex justify-center mt-8 gap-2">
                   <button
-                    onClick={() => setPagination(prev => ({ ...prev, currentPage: prev.currentPage - 1 }))}
+                    onClick={() => handlePageChange(pagination.currentPage - 1)}
                     disabled={pagination.currentPage === 1}
                     className="btn-secondary px-4 py-2 disabled:opacity-50"
                   >
@@ -120,7 +131,7 @@ export default function ProductsPage() {
                       return (
                         <button
                           key={page}
-                          onClick={() => setPagination(prev => ({ ...prev, currentPage: page }))}
+                          onClick={() => handlePageChange(page)}
                           className={`px-4 py-2 ${
                             pagination.currentPage === page
                               ? 'bg-accent-gold text-white'
@@ -134,7 +145,7 @@ export default function ProductsPage() {
                   </div>
 
                   <button
-                    onClick={() => setPagination(prev => ({ ...prev, currentPage: prev.currentPage + 1 }))}
+                    onClick={() => handlePageChange(pagination.currentPage + 1)}
                     disabled={pagination.currentPage === pagination.totalPages}
                     className="btn-secondary px-4 py-2 disabled:opacity-50"
                   >
@@ -147,5 +158,20 @@ export default function ProductsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="container py-8">
+        <div className="flex justify-center items-center py-20">
+          <Loader2 className="animate-spin" size={32} />
+        </div>
+      </div>
+    }>
+      <ProductsPageContent />
+    </Suspense>
   );
 }

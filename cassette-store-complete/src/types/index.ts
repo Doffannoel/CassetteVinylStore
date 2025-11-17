@@ -55,8 +55,8 @@ export interface Order {
     | 'completed'
     | 'cancelled'
     | 'ready_pickup';
-  paymentMethod?: string;
-  paymentStatus?: string;
+  paymentMethod: string;
+  paymentStatus: string;
   midtransToken?: string;
   midtransRedirectUrl?: string;
   notes?: string;

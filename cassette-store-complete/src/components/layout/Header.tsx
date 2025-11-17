@@ -128,20 +128,21 @@ const Header = () => {
                               <p className="text-xs text-text-body">{user.email}</p>
                             </div>
                             <div className="py-2">
-                              <Link
+                              {/* <Link
                                 href="/profile"
                                 className="block px-4 py-2 text-sm hover:bg-neutral-card"
                                 onClick={() => setShowUserMenu(false)}
                               >
                                 My Profile
-                              </Link>
-                              <Link
+                              </Link> */}
+
+                              {/* <Link
                                 href="/orders"
                                 className="block px-4 py-2 text-sm hover:bg-neutral-card"
                                 onClick={() => setShowUserMenu(false)}
                               >
                                 My Orders
-                              </Link>
+                              </Link> */}
                               {user.role === 'admin' && (
                                 <Link
                                   href="/admin"

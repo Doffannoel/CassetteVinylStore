@@ -2,6 +2,7 @@ import mongoose, { Schema, model, models, Document, Model } from 'mongoose';
 
 // Define an interface for the Order document
 export interface IOrder extends Document {
+  userId: mongoose.Types.ObjectId;
   orderId: string;
   items: {
     product: mongoose.Types.ObjectId;
@@ -30,6 +31,7 @@ export interface IOrder extends Document {
   midtransToken?: string;
   midtransRedirectUrl?: string;
   midtransTransactionId?: string;
+  midtransOrderIds?: string[];
   notes?: string;
   completedAt?: Date;
   cancelledAt?: Date;
@@ -145,6 +147,10 @@ const OrderSchema = new Schema<IOrder, IOrderModel>(
     midtransToken: String,
     midtransRedirectUrl: String,
     midtransTransactionId: String,
+    midtransOrderIds: {
+      type: [String],
+      default: [],
+    },
     notes: String,
     completedAt: Date,
     cancelledAt: Date,
@@ -160,7 +166,6 @@ function arrayMinLength(val: any[]) {
 }
 
 // Indexes
-OrderSchema.index({ orderId: 1 });
 OrderSchema.index({ status: 1, createdAt: -1 });
 OrderSchema.index({ 'customerInfo.email': 1 });
 OrderSchema.index({ paymentStatus: 1 });

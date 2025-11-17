@@ -23,7 +23,7 @@ export async function POST(
     await connectDB();
 
     // Find the order and populate product details
-    const order = await Order.findById(id).populate('items.product');
+    const order = await Order.findOne({ orderId: id }).populate('items.product');
 
     if (!order) {
       return NextResponse.json(
@@ -57,11 +57,11 @@ export async function POST(
       }
     }
 
-    const newOrderId = `CASS-${new Date().getTime()}`;
+    const midtransOrderId = `${order.orderId}-${Date.now()}`;
 
     const transactionDetails = {
       transaction_details: {
-        order_id: newOrderId,
+        order_id: midtransOrderId,
         gross_amount: order.totalAmount,
       },
       customer_details: {
@@ -83,13 +83,16 @@ export async function POST(
     const transaction = await snap.createTransaction(transactionDetails);
     const { token, redirect_url } = transaction;
 
-    // Update the original order with the new Order ID and Midtrans token
-    order.orderId = newOrderId;
+    // Update the order with the new Midtrans order ID and token
+    if (!order.midtransOrderIds) {
+      order.midtransOrderIds = [];
+    }
+    order.midtransOrderIds.push(midtransOrderId);
     order.midtransToken = token;
     order.midtransRedirectUrl = redirect_url;
     order.status = 'pending';
     order.paymentStatus = 'pending';
-    
+
     await order.save();
 
     return NextResponse.json({

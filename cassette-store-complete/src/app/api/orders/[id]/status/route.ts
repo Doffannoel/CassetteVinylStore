@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
+import Cart from '@/models/Cart';
 import { verifyToken, JWTPayload } from '@/utils/auth';
 
 // PUT /api/orders/[id]/status - Update order status (Admin only)
@@ -62,7 +63,7 @@ export async function PUT(
 
     const { id } = params;
 
-    const order = await Order.findById(id);
+    const order = await Order.findOne({ orderId: id });
 
     if (!order) {
       return NextResponse.json(
@@ -81,6 +82,9 @@ export async function PUT(
     if (status === 'paid' || status === 'completed') {
       order.paymentStatus = 'paid';
       await order.save();
+
+      // Clear the user's cart
+      await Cart.deleteOne({ userId: order.userId });
     }
 
     return NextResponse.json({

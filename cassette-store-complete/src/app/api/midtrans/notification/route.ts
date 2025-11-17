@@ -26,11 +26,12 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     // Find order by Midtrans order ID
-    const order = await Order.findOne({ 
+    const order = await Order.findOne({
       $or: [
         { orderId: body.order_id },
-        { midtransTransactionId: body.transaction_id }
-      ]
+        { midtransTransactionId: body.transaction_id },
+        { midtransOrderIds: body.order_id },
+      ],
     });
 
     if (!order) {

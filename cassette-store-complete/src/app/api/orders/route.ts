@@ -182,19 +182,20 @@ export async function POST(request: NextRequest) {
       totalAmount += product.price * item.quantity;
     }
 
-    // Create order first without orderId and pickupCode
+    // Generate orderId and pickupCode
+    const orderId = Order.generateOrderId();
+    const pickupCode = Order.generatePickupCode();
+
+    // Create new order
     const order = await Order.create({
+      orderId,
       items: orderItems,
       customerInfo,
       totalAmount,
       status: 'pending',
       paymentStatus: 'pending',
+      pickupCode,
     });
-
-    // Generate orderId and pickupCode using instance methods
-    order.orderId = (order as any).generateOrderId();
-    order.pickupCode = (order as any).generatePickupCode();
-    await order.save();
 
     // Reduce stock for each product
     for (const item of items) {

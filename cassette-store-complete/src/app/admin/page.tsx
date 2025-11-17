@@ -4,6 +4,8 @@ import AdminOrderList from '@/components/admin/AdminOrderList';
 import AdminProductList from '@/components/admin/AdminProductList';
 import ProductForm from '@/components/admin/ProductForm';
 import AdminStats from '@/components/admin/AdminStats';
+import AdminPickup from '@/components/admin/AdminPickup';
+
 import { useState } from 'react';
 
 export default function AdminPage() {
@@ -43,13 +45,13 @@ export default function AdminPage() {
             Orders
           </button>
           <button
-            onClick={() => setActiveTab('addProduct')}
-            className={`${activeTab === 'addProduct'
+            onClick={() => setActiveTab('pickup')}
+            className={`${activeTab === 'pickup'
               ? 'border-accent-gold text-accent-gold'
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm uppercase tracking-wider transition-colors`}
           >
-            Add New Product
+            Pickup Code
           </button>
         </nav>
       </div>
@@ -58,12 +60,7 @@ export default function AdminPage() {
         {activeTab === 'stats' && <AdminStats />}
         {activeTab === 'products' && <AdminProductList />}
         {activeTab === 'orders' && <AdminOrderList />}
-        {activeTab === 'addProduct' && (
-          <ProductForm
-            onClose={() => setActiveTab('products')}
-            onSuccess={() => setActiveTab('products')}
-          />
-        )}
+        {activeTab === 'pickup' && <AdminPickup />}
       </div>
     </div>
   );

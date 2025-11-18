@@ -24,7 +24,7 @@ export async function GET(
     }
 
     if (!order) {
-      order = await Order.findOne({ orderId: id })
+      order = await Order.findById(id)
         .populate(productPopulation)
         .lean();
     }

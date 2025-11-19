@@ -68,6 +68,20 @@ export interface Order {
   pickedUpAt?: Date;
 }
 
+// Tambahkan interface baru untuk populated order
+export interface PopulatedOrderItem {
+  product: Product; // Bukan string | Product, tapi langsung Product
+  quantity: number;
+  price: number;
+  name?: string;
+  artist?: string;
+  category?: 'vinyl' | 'cd' | 'cassette';
+}
+
+export interface PopulatedOrder extends Omit<Order, 'items'> {
+  items: PopulatedOrderItem[];
+}
+
 // Customer types
 export interface CustomerInfo {
   name: string;

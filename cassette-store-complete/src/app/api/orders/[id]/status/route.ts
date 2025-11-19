@@ -7,7 +7,7 @@ import { verifyToken, JWTPayload } from '@/utils/auth';
 // PUT /api/orders/[id]/status - Update order status (Admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check admin authentication
@@ -61,9 +61,9 @@ export async function PUT(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;;
 
-    const order = await Order.findOne({ orderId: id });
+    const order = await Order.findById(id);
 
     if (!order) {
       return NextResponse.json(

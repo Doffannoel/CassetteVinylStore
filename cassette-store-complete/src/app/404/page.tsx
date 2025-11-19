@@ -107,10 +107,6 @@ export default function NotFoundPage() {
                             <Link href="/products?category=cassette" className="text-gray-700 hover:text-[#c9a961] transition">
                                 Cassettes
                             </Link>
-                            <span className="text-gray-400">•</span>
-                            <Link href="/contact" className="text-gray-700 hover:text-[#c9a961] transition">
-                                Contact Us
-                            </Link>
                         </div>
                     </div>
                 </div>

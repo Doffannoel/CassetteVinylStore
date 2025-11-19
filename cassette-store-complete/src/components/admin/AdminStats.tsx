@@ -2,53 +2,142 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2, TrendingUp, Package, DollarSign, ShoppingCart, Calendar } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+interface DailyStats {
+    date: string;
+    revenue: number;
+    itemsSold: number;
+    orders: number;
+}
 
 interface StatsData {
     totalRevenue: number;
     totalOrders: number;
     totalProducts: number;
     pendingOrders: number;
-    revenueByMonth: { month: string; revenue: number; orders: number }[];
-    revenueByCategory: { category: string; revenue: number; count: number }[];
-    recentOrders: any[];
+    dailyStats: DailyStats[];
     topProducts: { name: string; sold: number; revenue: number }[];
+    recentOrders: any[];
 }
 
 const AdminStats = () => {
     const [stats, setStats] = useState<StatsData | null>(null);
     const [loading, setLoading] = useState(true);
     const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month');
+    const [chartType, setChartType] = useState<'line' | 'bar'>('line');
 
     useEffect(() => {
         fetchStats();
     }, [timeRange]);
 
     const fetchStats = async () => {
+        setLoading(true);
         try {
-            const response = await fetch(`/api/admin/stats?range=${timeRange}`, {
+            // Fetch orders data
+            const ordersResponse = await fetch('/api/orders', {
                 credentials: 'include',
             });
 
-            const data = await response.json();
-
-            if (response.status === 401) {
-                toast.error('Session expired. Please login again.');
+            if (ordersResponse.status === 401) {
                 window.location.href = '/login?redirect=/admin';
                 return;
             }
 
-            if (data.success) {
-                setStats(data.data);
-            } else {
-                toast.error(data.error || 'Failed to fetch statistics');
+            const ordersData = await ordersResponse.json();
+
+            if (!ordersData.success) {
+                console.error('Failed to fetch orders');
+                return;
             }
+
+            // Fetch basic stats
+            const statsResponse = await fetch(`/api/admin/stats?range=${timeRange}`, {
+                credentials: 'include',
+            });
+
+            const statsData = await statsResponse.json();
+
+            if (!statsData.success) {
+                console.error('Failed to fetch stats');
+                return;
+            }
+
+            // Process orders to get daily statistics
+            const orders = ordersData.data.orders || [];
+            const dailyData = processOrdersByDay(orders, timeRange);
+
+            setStats({
+                totalRevenue: statsData.data.totalRevenue,
+                totalOrders: statsData.data.totalOrders,
+                totalProducts: statsData.data.totalProducts,
+                pendingOrders: statsData.data.pendingOrders,
+                dailyStats: dailyData,
+                topProducts: statsData.data.topProducts || [],
+                recentOrders: statsData.data.recentOrders || [],
+            });
         } catch (error) {
             console.error('Error fetching stats:', error);
-            toast.error('Failed to fetch statistics');
         } finally {
             setLoading(false);
         }
+    };
+
+    const processOrdersByDay = (orders: any[], range: string) => {
+        const now = new Date();
+        let days = 30;
+
+        if (range === 'week') days = 7;
+        if (range === 'year') days = 365;
+
+        // Initialize daily data
+        const dailyMap = new Map<string, DailyStats>();
+
+        for (let i = days - 1; i >= 0; i--) {
+            const date = new Date(now);
+            date.setDate(date.getDate() - i);
+            const dateStr = date.toISOString().split('T')[0];
+
+            dailyMap.set(dateStr, {
+                date: formatDate(date, range),
+                revenue: 0,
+                itemsSold: 0,
+                orders: 0,
+            });
+        }
+
+        // Process orders
+        orders.forEach((order: any) => {
+            if (!['paid', 'shipped', 'completed'].includes(order.status)) return;
+
+            const orderDate = new Date(order.createdAt);
+            const dateStr = orderDate.toISOString().split('T')[0];
+
+            if (dailyMap.has(dateStr)) {
+                const dayData = dailyMap.get(dateStr)!;
+                dayData.revenue += order.totalAmount || 0;
+                dayData.orders += 1;
+
+                // Count items sold
+                if (order.items && Array.isArray(order.items)) {
+                    order.items.forEach((item: any) => {
+                        dayData.itemsSold += item.quantity || 0;
+                    });
+                }
+            }
+        });
+
+        return Array.from(dailyMap.values());
+    };
+
+    const formatDate = (date: Date, range: string) => {
+        if (range === 'week') {
+            return date.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric' });
+        }
+        if (range === 'year') {
+            return date.toLocaleDateString('id-ID', { month: 'short', day: 'numeric' });
+        }
+        return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
     };
 
     const formatPrice = (price: number) => {
@@ -61,6 +150,22 @@ const AdminStats = () => {
 
     const formatNumber = (num: number) => {
         return new Intl.NumberFormat('id-ID').format(num);
+    };
+
+    const CustomTooltip = ({ active, payload, label }: any) => {
+        if (active && payload && payload.length) {
+            return (
+                <div className="bg-white border border-neutral-divider p-4 shadow-lg rounded">
+                    <p className="font-semibold mb-2">{label}</p>
+                    {payload.map((entry: any, index: number) => (
+                        <p key={index} style={{ color: entry.color }} className="text-sm font-medium">
+                            {entry.name}: {entry.dataKey === 'revenue' ? formatPrice(entry.value) : `${formatNumber(entry.value)} items`}
+                        </p>
+                    ))}
+                </div>
+            );
+        }
+        return null;
     };
 
     if (loading) {
@@ -79,12 +184,10 @@ const AdminStats = () => {
         );
     }
 
-    const maxRevenue = Math.max(...stats.revenueByMonth.map(m => m.revenue));
-
     return (
         <div className="space-y-6">
             {/* Header with Time Range Filter */}
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center flex-wrap gap-4">
                 <h2 className="text-2xl font-semibold">Statistics & Analytics</h2>
                 <div className="flex gap-2">
                     <button
@@ -94,7 +197,7 @@ const AdminStats = () => {
                             : 'bg-white border border-neutral-divider hover:bg-gray-50'
                             }`}
                     >
-                        This Week
+                        7 Days
                     </button>
                     <button
                         onClick={() => setTimeRange('month')}
@@ -103,7 +206,7 @@ const AdminStats = () => {
                             : 'bg-white border border-neutral-divider hover:bg-gray-50'
                             }`}
                     >
-                        This Month
+                        30 Days
                     </button>
                     <button
                         onClick={() => setTimeRange('year')}
@@ -112,14 +215,13 @@ const AdminStats = () => {
                             : 'bg-white border border-neutral-divider hover:bg-gray-50'
                             }`}
                     >
-                        This Year
+                        1 Year
                     </button>
                 </div>
             </div>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* Total Revenue */}
                 <div className="bg-white border border-neutral-divider p-6">
                     <div className="flex items-center justify-between mb-2">
                         <p className="text-sm uppercase tracking-wider text-text-body">Total Revenue</p>
@@ -132,7 +234,6 @@ const AdminStats = () => {
                     </p>
                 </div>
 
-                {/* Total Orders */}
                 <div className="bg-white border border-neutral-divider p-6">
                     <div className="flex items-center justify-between mb-2">
                         <p className="text-sm uppercase tracking-wider text-text-body">Total Orders</p>
@@ -144,7 +245,6 @@ const AdminStats = () => {
                     </p>
                 </div>
 
-                {/* Total Products */}
                 <div className="bg-white border border-neutral-divider p-6">
                     <div className="flex items-center justify-between mb-2">
                         <p className="text-sm uppercase tracking-wider text-text-body">Total Products</p>
@@ -154,7 +254,6 @@ const AdminStats = () => {
                     <p className="text-xs text-text-body mt-2">Active in catalog</p>
                 </div>
 
-                {/* Average Order Value */}
                 <div className="bg-white border border-neutral-divider p-6">
                     <div className="flex items-center justify-between mb-2">
                         <p className="text-sm uppercase tracking-wider text-text-body">Avg Order Value</p>
@@ -167,66 +266,162 @@ const AdminStats = () => {
                 </div>
             </div>
 
-            {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Revenue by Month Chart */}
-                <div className="bg-white border border-neutral-divider p-6">
-                    <h3 className="text-lg font-semibold mb-6 uppercase tracking-wider">Revenue Trend</h3>
-                    <div className="space-y-4">
-                        {stats.revenueByMonth.map((item, index) => (
-                            <div key={index}>
-                                <div className="flex justify-between text-sm mb-1">
-                                    <span className="font-medium">{item.month}</span>
-                                    <span className="text-accent-gold font-bold">{formatPrice(item.revenue)}</span>
-                                </div>
-                                <div className="flex justify-between text-xs text-text-body mb-2">
-                                    <span>{item.orders} orders</span>
-                                    <span>
-                                        {maxRevenue > 0 ? Math.round((item.revenue / maxRevenue) * 100) : 0}%
-                                    </span>
-                                </div>
-                                <div className="h-3 bg-neutral-card">
-                                    <div
-                                        className="h-full bg-accent-gold transition-all"
-                                        style={{
-                                            width: `${maxRevenue > 0 ? (item.revenue / maxRevenue) * 100 : 0}%`,
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
+            {/* Chart Type Selector */}
+            <div className="flex justify-end gap-2">
+                <button
+                    onClick={() => setChartType('line')}
+                    className={`px-4 py-2 text-sm font-medium transition-colors ${chartType === 'line'
+                        ? 'bg-accent-gold text-white'
+                        : 'bg-white border border-neutral-divider hover:bg-gray-50'
+                        }`}
+                >
+                    Line Chart
+                </button>
+                <button
+                    onClick={() => setChartType('bar')}
+                    className={`px-4 py-2 text-sm font-medium transition-colors ${chartType === 'bar'
+                        ? 'bg-accent-gold text-white'
+                        : 'bg-white border border-neutral-divider hover:bg-gray-50'
+                        }`}
+                >
+                    Bar Chart
+                </button>
+            </div>
 
-                {/* Revenue by Category */}
+            {/* Charts Section - Separated */}
+            <div className="grid grid-cols-1 gap-6">
+                {/* Revenue Chart */}
                 <div className="bg-white border border-neutral-divider p-6">
                     <h3 className="text-lg font-semibold mb-6 uppercase tracking-wider">
-                        Sales by Category
+                        Pendapatan Per Hari
                     </h3>
-                    <div className="space-y-6">
-                        {stats.revenueByCategory.map((item, index) => {
-                            const maxCategoryRevenue = Math.max(...stats.revenueByCategory.map(c => c.revenue));
-                            const percentage = maxCategoryRevenue > 0 ? (item.revenue / maxCategoryRevenue) * 100 : 0;
+                    <ResponsiveContainer width="100%" height={400}>
+                        {chartType === 'line' ? (
+                            <LineChart data={stats.dailyStats}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                <XAxis
+                                    dataKey="date"
+                                    stroke="#6b7280"
+                                    style={{ fontSize: '12px' }}
+                                    angle={-45}
+                                    textAnchor="end"
+                                    height={80}
+                                />
+                                <YAxis
+                                    stroke="#d4af37"
+                                    style={{ fontSize: '12px' }}
+                                    tickFormatter={(value) => formatPrice(value)}
+                                />
+                                <Tooltip content={<CustomTooltip />} />
+                                <Legend
+                                    wrapperStyle={{ paddingTop: '20px' }}
+                                    iconType="line"
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="revenue"
+                                    stroke="#d4af37"
+                                    strokeWidth={3}
+                                    dot={{ fill: '#d4af37', r: 4 }}
+                                    activeDot={{ r: 6 }}
+                                    name="Pendapatan (IDR)"
+                                />
+                            </LineChart>
+                        ) : (
+                            <BarChart data={stats.dailyStats}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                <XAxis
+                                    dataKey="date"
+                                    stroke="#6b7280"
+                                    style={{ fontSize: '12px' }}
+                                    angle={-45}
+                                    textAnchor="end"
+                                    height={80}
+                                />
+                                <YAxis
+                                    stroke="#d4af37"
+                                    style={{ fontSize: '12px' }}
+                                    tickFormatter={(value) => formatPrice(value)}
+                                />
+                                <Tooltip content={<CustomTooltip />} />
+                                <Legend
+                                    wrapperStyle={{ paddingTop: '20px' }}
+                                />
+                                <Bar
+                                    dataKey="revenue"
+                                    fill="#d4af37"
+                                    name="Pendapatan (IDR)"
+                                    radius={[8, 8, 0, 0]}
+                                />
+                            </BarChart>
+                        )}
+                    </ResponsiveContainer>
+                </div>
 
-                            return (
-                                <div key={index}>
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div>
-                                            <p className="font-semibold uppercase text-sm">{item.category}</p>
-                                            <p className="text-xs text-text-body">{item.count} items sold</p>
-                                        </div>
-                                        <p className="text-lg font-bold text-accent-gold">{formatPrice(item.revenue)}</p>
-                                    </div>
-                                    <div className="h-2 bg-neutral-card">
-                                        <div
-                                            className="h-full bg-accent-gold transition-all"
-                                            style={{ width: `${percentage}%` }}
-                                        />
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
+                {/* Items Sold Chart */}
+                <div className="bg-white border border-neutral-divider p-6">
+                    <h3 className="text-lg font-semibold mb-6 uppercase tracking-wider">
+                        Jumlah Item Terjual Per Hari
+                    </h3>
+                    <ResponsiveContainer width="100%" height={400}>
+                        {chartType === 'line' ? (
+                            <LineChart data={stats.dailyStats}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                <XAxis
+                                    dataKey="date"
+                                    stroke="#6b7280"
+                                    style={{ fontSize: '12px' }}
+                                    angle={-45}
+                                    textAnchor="end"
+                                    height={80}
+                                />
+                                <YAxis
+                                    stroke="#3b82f6"
+                                    style={{ fontSize: '12px' }}
+                                />
+                                <Tooltip content={<CustomTooltip />} />
+                                <Legend
+                                    wrapperStyle={{ paddingTop: '20px' }}
+                                    iconType="line"
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="itemsSold"
+                                    stroke="#3b82f6"
+                                    strokeWidth={3}
+                                    dot={{ fill: '#3b82f6', r: 4 }}
+                                    activeDot={{ r: 6 }}
+                                    name="Item Terjual"
+                                />
+                            </LineChart>
+                        ) : (
+                            <BarChart data={stats.dailyStats}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                <XAxis
+                                    dataKey="date"
+                                    stroke="#6b7280"
+                                    style={{ fontSize: '12px' }}
+                                    angle={-45}
+                                    textAnchor="end"
+                                    height={80}
+                                />
+                                <YAxis
+                                    stroke="#3b82f6"
+                                    style={{ fontSize: '12px' }}
+                                />
+                                <Tooltip content={<CustomTooltip />} />
+                                <Legend
+                                    wrapperStyle={{ paddingTop: '20px' }}
+                                />
+                                <Bar
+                                    dataKey="itemsSold"
+                                    fill="#3b82f6"
+                                    name="Item Terjual"
+                                    radius={[8, 8, 0, 0]}
+                                />
+                            </BarChart>
+                        )}
+                    </ResponsiveContainer>
                 </div>
             </div>
 

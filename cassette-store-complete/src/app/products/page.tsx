@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import ProductCard from '@/components/products/ProductCard';
 import ProductFilters from '@/components/products/ProductFilters';
 import { Product } from '@/types';
@@ -9,6 +9,7 @@ import { Loader2, Grid, List } from 'lucide-react';
 
 function ProductsPageContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
@@ -49,10 +50,7 @@ function ProductsPageContent() {
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', newPage.toString());
-    // The router push will trigger the useEffect
-    window.history.pushState(null, '', `?${params.toString()}`);
-    // We need to manually trigger a re-render as pushState doesn't
-    fetchProducts(newPage);
+    router.push(`/products?${params.toString()}`);
   };
 
   return (
@@ -126,21 +124,29 @@ function ProductsPageContent() {
                   </button>
 
                   <div className="flex items-center gap-2">
-                    {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                    {Array.from({ length: pagination.totalPages }, (_, i) => {
                       const page = i + 1;
-                      return (
-                        <button
-                          key={page}
-                          onClick={() => handlePageChange(page)}
-                          className={`px-4 py-2 ${
-                            pagination.currentPage === page
-                              ? 'bg-accent-gold text-white'
-                              : 'bg-neutral-card hover:bg-neutral-divider'
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      );
+                      // Logic to display a limited number of pages around the current page
+                      const maxPagesToShow = 5;
+                      const startPage = Math.max(1, pagination.currentPage - Math.floor(maxPagesToShow / 2));
+                      const endPage = Math.min(pagination.totalPages, startPage + maxPagesToShow - 1);
+
+                      if (page >= startPage && page <= endPage) {
+                        return (
+                          <button
+                            key={page}
+                            onClick={() => handlePageChange(page)}
+                            className={`px-4 py-2 ${
+                              pagination.currentPage === page
+                                ? 'bg-accent-gold text-white'
+                                : 'bg-neutral-card hover:bg-neutral-divider'
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        );
+                      }
+                      return null;
                     })}
                   </div>
 

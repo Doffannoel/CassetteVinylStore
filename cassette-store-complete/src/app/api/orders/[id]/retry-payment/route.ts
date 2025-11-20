@@ -23,7 +23,7 @@ export async function POST(
     await connectDB();
 
     // Find the order and populate product details
-    const order = await Order.findById(id).populate('items.product');
+    const order = await Order.findOne({ orderId: id }).populate('items.product');
 
     if (!order) {
       return NextResponse.json(

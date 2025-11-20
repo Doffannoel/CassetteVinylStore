@@ -20,14 +20,13 @@ export async function GET(
 
     // The 'id' param can be either the MongoDB _id or the custom orderId string
     if (mongoose.Types.ObjectId.isValid(id)) {
-      order = await Order.findById(id).populate(productPopulation).lean();
+      order = await Order.findOne({ orderId: id }).populate(productPopulation).lean();
     }
 
-    if (!order) {
-      order = await Order.findById(id)
-        .populate(productPopulation)
-        .lean();
-    }
+    order = await Order.findOne({ orderId: id })
+      .populate(productPopulation)
+      .lean();
+
 
     if (!order) {
       return NextResponse.json(

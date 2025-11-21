@@ -12,7 +12,7 @@ import {
   Loader2,
   MessageCircle,
   Store,
-  AlertCircle
+  AlertCircle,
 } from 'lucide-react';
 import { IOrder } from '@/models/Order';
 import toast from 'react-hot-toast';
@@ -49,7 +49,10 @@ export default function OrderDetailsPage() {
   const [whatsappSent, setWhatsappSent] = useState(false);
 
   useEffect(() => {
-    const midtransScriptUrl = 'https://app.sandbox.midtrans.com/snap/snap.js';
+    const midtransScriptUrl =
+      process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === 'true'
+        ? 'https://app.midtrans.com/snap/snap.js'
+        : 'https://app.sandbox.midtrans.com/snap/snap.js';
 
     let script: HTMLScriptElement | null = document.querySelector(
       `script[src="${midtransScriptUrl}"]`
@@ -58,10 +61,7 @@ export default function OrderDetailsPage() {
     if (!script) {
       script = document.createElement('script');
       script.src = midtransScriptUrl;
-      script.setAttribute(
-        'data-client-key',
-        process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY!
-      );
+      script.setAttribute('data-client-key', process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY!);
       script.async = true;
       document.head.appendChild(script);
     }
@@ -302,9 +302,7 @@ export default function OrderDetailsPage() {
       <div className="container py-12 max-w-3xl text-center">
         <Package className="w-20 h-20 text-gray-400 mx-auto mb-4" />
         <h1 className="text-2xl font-heading mb-4">Pesanan Tidak Ditemukan</h1>
-        <p className="text-text-body mb-6">
-          Pesanan yang Anda cari tidak ada atau telah dihapus.
-        </p>
+        <p className="text-text-body mb-6">Pesanan yang Anda cari tidak ada atau telah dihapus.</p>
         <Link href="/products" className="btn-primary px-6 py-3 rounded-md">
           Kembali ke Produk
         </Link>
@@ -312,7 +310,9 @@ export default function OrderDetailsPage() {
     );
   }
 
-  const isPendingPayment = (order.paymentStatus === 'pending' || order.status === 'pending') && order.paymentMethod !== 'Pay at Store';
+  const isPendingPayment =
+    (order.paymentStatus === 'pending' || order.status === 'pending') &&
+    order.paymentMethod !== 'Pay at Store';
   const showWhatsAppButton = !isPendingPayment || order.paymentMethod === 'Pay at Store';
 
   return (
@@ -327,8 +327,7 @@ export default function OrderDetailsPage() {
           <p className="text-text-body">
             {isPendingPayment
               ? 'Selesaikan pembayaran Anda untuk memproses pesanan'
-              : 'Terima kasih telah berbelanja di Hysteria Music'
-            }
+              : 'Terima kasih telah berbelanja di Hysteria Music'}
           </p>
         </div>
 
@@ -340,8 +339,8 @@ export default function OrderDetailsPage() {
               <div className="flex-1">
                 <h3 className="font-semibold mb-2 text-yellow-800">Pembayaran Belum Selesai</h3>
                 <p className="text-sm text-yellow-700 mb-4">
-                  Silakan selesaikan pembayaran Anda. Jika Anda sudah membayar, mohon tunggu beberapa saat
-                  hingga status diperbarui.
+                  Silakan selesaikan pembayaran Anda. Jika Anda sudah membayar, mohon tunggu
+                  beberapa saat hingga status diperbarui.
                 </p>
                 <button
                   onClick={handleRetryPayment}
@@ -370,8 +369,8 @@ export default function OrderDetailsPage() {
               <div className="flex-1">
                 <h3 className="font-semibold mb-2 text-blue-800">Pembayaran di Toko</h3>
                 <p className="text-sm text-blue-700">
-                  Anda memilih untuk membayar di toko. Silakan datang ke toko kami dengan membawa kode pickup
-                  dan lakukan pembayaran di kasir.
+                  Anda memilih untuk membayar di toko. Silakan datang ke toko kami dengan membawa
+                  kode pickup dan lakukan pembayaran di kasir.
                 </p>
               </div>
             </div>
@@ -387,14 +386,12 @@ export default function OrderDetailsPage() {
                 <h3 className="font-semibold mb-2 text-green-800">
                   {order.paymentMethod === 'Pay at Store'
                     ? 'Kirim Pengingat Pesanan ke WhatsApp'
-                    : 'Kirim Detail Pesanan ke WhatsApp'
-                  }
+                    : 'Kirim Detail Pesanan ke WhatsApp'}
                 </h3>
                 <p className="text-sm text-green-700 mb-4">
                   {order.paymentMethod === 'Pay at Store'
                     ? 'Dapatkan detail pesanan dan kode pickup di WhatsApp Anda sebagai pengingat saat melakukan pembayaran dan pengambilan barang di toko'
-                    : 'Kirim bukti pembayaran ke WhatsApp Anda untuk ditunjukkan saat pengambilan barang di toko'
-                  }
+                    : 'Kirim bukti pembayaran ke WhatsApp Anda untuk ditunjukkan saat pengambilan barang di toko'}
                 </p>
                 {!whatsappSent ? (
                   <button
@@ -404,8 +401,7 @@ export default function OrderDetailsPage() {
                     <MessageCircle size={20} />
                     {order.paymentMethod === 'Pay at Store'
                       ? 'Kirim Pengingat ke WhatsApp'
-                      : 'Kirim ke WhatsApp Saya'
-                    }
+                      : 'Kirim ke WhatsApp Saya'}
                   </button>
                 ) : (
                   <div className="flex items-center gap-2 text-green-600">
@@ -413,8 +409,7 @@ export default function OrderDetailsPage() {
                     <span className="font-semibold">
                       {order.paymentMethod === 'Pay at Store'
                         ? 'Pengingat terkirim! Cek WhatsApp Anda.'
-                        : 'WhatsApp terkirim! Cek pesan Anda.'
-                      }
+                        : 'WhatsApp terkirim! Cek pesan Anda.'}
                     </span>
                   </div>
                 )}
@@ -442,7 +437,9 @@ export default function OrderDetailsPage() {
             </div>
             <div>
               <p className="text-sm text-text-body">Status</p>
-              <span className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${getStatusBadgeColor(order.status)}`}>
+              <span
+                className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${getStatusBadgeColor(order.status)}`}
+              >
                 {getStatusText(order.status)}
               </span>
             </div>
@@ -467,8 +464,7 @@ export default function OrderDetailsPage() {
               <p className="text-sm mt-2 opacity-90">
                 {order.paymentMethod === 'Pay at Store'
                   ? 'Simpan kode ini untuk pembayaran dan pengambilan barang di toko'
-                  : 'Tunjukkan kode ini saat pengambilan barang'
-                }
+                  : 'Tunjukkan kode ini saat pengambilan barang'}
               </p>
             </div>
           )}
@@ -504,7 +500,10 @@ export default function OrderDetailsPage() {
             {order.items.map((item, index) => {
               const product = item.product as any;
               return (
-                <div key={index} className="flex items-center gap-4 pb-4 border-b border-neutral-divider last:border-b-0">
+                <div
+                  key={index}
+                  className="flex items-center gap-4 pb-4 border-b border-neutral-divider last:border-b-0"
+                >
                   <img
                     src={product.images?.[0] || '/images/placeholder.png'}
                     alt={product.name}
@@ -547,8 +546,7 @@ export default function OrderDetailsPage() {
                   <h3 className="font-semibold mb-2">
                     {order.paymentMethod === 'Pay at Store'
                       ? 'Cara Pembayaran dan Pengambilan Barang'
-                      : 'Cara Pengambilan Barang'
-                    }
+                      : 'Cara Pengambilan Barang'}
                   </h3>
                   <ol className="text-sm text-text-body space-y-2 list-decimal list-inside">
                     {order.paymentMethod === 'Pay at Store' ? (
@@ -556,9 +554,16 @@ export default function OrderDetailsPage() {
                         <li>Simpan kode pickup di WhatsApp atau screenshot halaman ini</li>
                         <li>Datang ke toko maksimal dalam 1x24 jam</li>
                         <li>
-                          Tunjukkan kode: <strong className="text-accent-gold">{order.pickupCode}</strong> kepada kasir
+                          Tunjukkan kode:{' '}
+                          <strong className="text-accent-gold">{order.pickupCode}</strong> kepada
+                          kasir
                         </li>
-                        <li>Lakukan pembayaran sejumlah <strong className="text-accent-gold">{formatCurrency(order.totalAmount)}</strong></li>
+                        <li>
+                          Lakukan pembayaran sejumlah{' '}
+                          <strong className="text-accent-gold">
+                            {formatCurrency(order.totalAmount)}
+                          </strong>
+                        </li>
                         <li>Tunjukkan identitas diri (KTP/SIM) yang sesuai dengan nama pemesan</li>
                         <li>Terima barang dan struk pembayaran Anda</li>
                       </>
@@ -567,7 +572,8 @@ export default function OrderDetailsPage() {
                         <li>Simpan bukti pembayaran atau kode pickup</li>
                         <li>Datang ke toko dalam 1x24 jam</li>
                         <li>
-                          Tunjukkan kode pengambilan: <strong className="text-accent-gold">{order.pickupCode}</strong>
+                          Tunjukkan kode pengambilan:{' '}
+                          <strong className="text-accent-gold">{order.pickupCode}</strong>
                         </li>
                         <li>Bawa KTP/identitas yang sesuai dengan nama pembeli</li>
                         <li>Ambil barang Anda di counter</li>

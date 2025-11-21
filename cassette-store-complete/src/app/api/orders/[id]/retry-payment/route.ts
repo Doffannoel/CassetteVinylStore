@@ -1,28 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
-import Product from '@/models/Product';
 import midtransClient from 'midtrans-client';
-import mongoose from 'mongoose';
 
-// Initialize Midtrans Snap API
 const snap = new midtransClient.Snap({
-  isProduction: false,
+  isProduction: process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === 'true',
   serverKey: process.env.MIDTRANS_SERVER_KEY,
   clientKey: process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY,
 });
 
-export async function POST(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const params = await context.params;
-    const { id } = await params;;
+    const { id } = await context.params;
 
     await connectDB();
 
-    // Find the order and populate product details
     const order = await Order.findOne({ orderId: id }).populate('items.product');
 
     if (!order) {
@@ -32,26 +24,18 @@ export async function POST(
       );
     }
 
-    // Allow retry only for pending or failed orders
     if (order.status !== 'pending' && order.paymentStatus !== 'failed') {
       return NextResponse.json(
-        {
-          success: false,
-          error: 'Hanya pesanan yang pending atau gagal yang bisa dicoba bayar ulang.',
-        },
+        { success: false, error: 'Pesanan tidak bisa dibayar ulang.' },
         { status: 400 }
       );
     }
 
-    // Re-check stock availability
-    for (const item of order.items) {
-      const product = item.product as any; // The product is already populated
-      if (!product || product.stock < item.quantity) {
+    for (const item of order.items as any[]) { // Cast to any[] to access product properties
+      // Ensure product is populated and has a stock property
+      if (item.product && item.product.stock !== undefined && item.product.stock < item.quantity) {
         return NextResponse.json(
-          {
-            success: false,
-            error: `Stok untuk ${product.name} tidak mencukupi.`,
-          },
+          { success: false, error: `Stok tidak cukup: ${item.product.name}` },
           { status: 400 }
         );
       }
@@ -59,7 +43,7 @@ export async function POST(
 
     const midtransOrderId = `${order.orderId}-${Date.now()}`;
 
-    const transactionDetails = {
+    const transactionParams = {
       transaction_details: {
         order_id: midtransOrderId,
         gross_amount: order.totalAmount,
@@ -76,38 +60,32 @@ export async function POST(
         name: `${item.product.name} - ${item.product.artist}`,
       })),
       callbacks: {
-        finish: `${process.env.NEXT_PUBLIC_BASE_URL}/orders/${order._id}`,
+        finish: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success?orderId=${order.orderId}`,
       },
     };
 
-    const transaction = await snap.createTransaction(transactionDetails);
-    const { token, redirect_url } = transaction;
+    const transaction = await snap.createTransaction(transactionParams);
 
-    // Update the order with the new Midtrans order ID and token
-    if (!order.midtransOrderIds) {
-      order.midtransOrderIds = [];
-    }
+    if (!order.midtransOrderIds) order.midtransOrderIds = [];
     order.midtransOrderIds.push(midtransOrderId);
-    order.midtransToken = token;
-    order.midtransRedirectUrl = redirect_url;
-    order.status = 'pending';
+
+    order.midtransToken = transaction.token;
+    order.midtransRedirectUrl = transaction.redirect_url;
     order.paymentStatus = 'pending';
+    order.status = 'pending';
 
     await order.save();
 
     return NextResponse.json({
       success: true,
-      message: 'Token pembayaran baru telah dibuat.',
-      token,
+      token: transaction.token,
+      redirect_url: transaction.redirect_url,
+      message: 'Token pembayaran berhasil dibuat.',
     });
   } catch (error: any) {
-    console.error('Error retrying payment:', error);
+    console.error('Midtrans retry error:', error);
     return NextResponse.json(
-      {
-        success: false,
-        error: 'Gagal mencoba ulang pembayaran.',
-        message: error.message,
-      },
+      { success: false, error: 'Gagal membuat transaksi.', message: error.message },
       { status: 500 }
     );
   }

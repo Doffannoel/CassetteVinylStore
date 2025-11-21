@@ -1,3 +1,4 @@
+// src\app\api\midtrans\notification\route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import connectDB from '@/lib/mongodb';
@@ -7,7 +8,7 @@ import Product from '@/models/Product';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
+
     // Verify signature key from Midtrans
     const signatureKey = crypto
       .createHash('sha512')
@@ -17,10 +18,7 @@ export async function POST(request: NextRequest) {
       .digest('hex');
 
     if (signatureKey !== body.signature_key) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid signature' },
-        { status: 403 }
-      );
+      return NextResponse.json({ success: false, error: 'Invalid signature' }, { status: 403 });
     }
 
     await connectDB();
@@ -36,10 +34,7 @@ export async function POST(request: NextRequest) {
 
     if (!order) {
       console.error('Order not found:', body.order_id);
-      return NextResponse.json(
-        { success: false, error: 'Order not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 });
     }
 
     // Update order based on transaction status
@@ -60,7 +55,11 @@ export async function POST(request: NextRequest) {
     } else if (transactionStatus === 'settlement') {
       orderStatus = 'paid';
       paymentStatus = 'paid';
-    } else if (transactionStatus === 'cancel' || transactionStatus === 'deny' || transactionStatus === 'expire') {
+    } else if (
+      transactionStatus === 'cancel' ||
+      transactionStatus === 'deny' ||
+      transactionStatus === 'expire'
+    ) {
       orderStatus = 'cancelled';
       paymentStatus = 'failed';
     } else if (transactionStatus === 'pending') {
@@ -76,7 +75,7 @@ export async function POST(request: NextRequest) {
     order.paymentStatus = paymentStatus;
     order.midtransTransactionId = body.transaction_id;
     order.paymentMethod = body.payment_type;
-    
+
     await order.save();
 
     console.log(`Order ${order.orderId} updated: status=${orderStatus}, payment=${paymentStatus}`);

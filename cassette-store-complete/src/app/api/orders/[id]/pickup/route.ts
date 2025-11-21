@@ -53,7 +53,7 @@ export async function PUT(
 
     const { pickupStatus, pickedUpBy, pickedUpAt } = await request.json();
 
-    const order = await Order.findOne({ orderId: id });
+    const order = await Order.findById(id);
 
     if (!order) {
       return NextResponse.json(

@@ -15,7 +15,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
 
     await connectDB();
 
-    const order = await Order.findOne({ orderId: id }).populate('items.product');
+    const order = await Order.findById(id).populate('items.product');
 
     if (!order) {
       return NextResponse.json(

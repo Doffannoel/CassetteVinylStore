@@ -144,13 +144,16 @@ export default function ProductDetailPage() {
               <h3 className="text-xl font-heading">Login Required</h3>
             </div>
             <p className="text-text-body mb-6">
-              You need to login to add items to your cart. Your cart will be saved and synced across devices.
+              You need to login to add items to your cart. Your cart will be saved and synced across
+              devices.
             </p>
             <div className="flex gap-3">
-              <button onClick={() => {
-                const currentPath = window.location.pathname;
-                router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
-              }}>
+              <button
+                onClick={() => {
+                  const currentPath = window.location.pathname;
+                  router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
+                }}
+              >
                 Login
               </button>
               <button
@@ -205,8 +208,9 @@ export default function ProductDetailPage() {
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`w-20 h-20 flex-shrink-0 border-2 ${selectedImage === index ? 'border-accent-gold' : 'border-neutral-divider'
-                    }`}
+                  className={`w-20 h-20 flex-shrink-0 border-2 ${
+                    selectedImage === index ? 'border-accent-gold' : 'border-neutral-divider'
+                  }`}
                 >
                   <img
                     src={image}
@@ -384,16 +388,16 @@ export default function ProductDetailPage() {
           {/* Shipping Info */}
           <div className="mt-8 space-y-3">
             <div className="flex items-center gap-3">
-              <Truck size={20} className="text-accent-gold" />
-              <span className="text-sm">Free shipping on orders above Rp 500.000</span>
+              {/* <Truck size={20} className="text-accent-gold" />
+              <span className="text-sm">Free shipping on orders above Rp 500.000</span> */}
             </div>
             <div className="flex items-center gap-3">
               <Shield size={20} className="text-accent-gold" />
               <span className="text-sm">100% authentic products guaranteed</span>
             </div>
             <div className="flex items-center gap-3">
-              <RotateCcw size={20} className="text-accent-gold" />
-              <span className="text-sm">14-day return policy</span>
+              {/* <RotateCcw size={20} className="text-accent-gold" />
+              <span className="text-sm">14-day return policy</span> */}
             </div>
           </div>
         </div>

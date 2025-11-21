@@ -47,7 +47,8 @@ export default function Home() {
       title: 'CD Classics',
       subtitle: 'Crystal Clear Digital',
       description: 'Immerse yourself in high-quality CD recordings',
-      image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&h=600&fit=crop',
+      image:
+        'https://images.unsplash.com/photo-1664935036533-034f95675eca?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
       cta: 'Browse CDs',
       link: '/products?category=cd',
     },
@@ -137,7 +138,7 @@ export default function Home() {
           {/* Content Overlay */}
           <div className="relative container h-full flex items-center">
             <div className="max-w-3xl text-white">
-              <h1 className="text-5xl lg:text-7xl font-heading mb-6 leading-tight">
+              <h1 className="text-5xl lg:text-7xl font-heading mb-6 leading-tight text-primary-bg [text-shadow:1px_1px_2px_rgba(0,0,0,0.7)]">
                 YOUR MUSIC,
                 <br />
                 OUR PASSION

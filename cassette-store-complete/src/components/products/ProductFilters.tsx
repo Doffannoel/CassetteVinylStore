@@ -13,13 +13,13 @@ const ProductFilters = () => {
     { value: 'cassette', label: 'Cassette' },
   ];
 
-  const priceRanges = [
-    { value: '0-100000', label: 'Under Rp 100.000' },
-    { value: '100000-300000', label: 'Rp 100.000 - Rp 300.000' },
-    { value: '300000-500000', label: 'Rp 300.000 - Rp 500.000' },
-    { value: '500000-1000000', label: 'Rp 500.000 - Rp 1.000.000' },
-    { value: '1000000', label: 'Above Rp 1.000.000' },
-  ];
+  // const priceRanges = [
+  //   { value: '0-100000', label: 'Under Rp 100.000' },
+  //   { value: '100000-300000', label: 'Rp 100.000 - Rp 300.000' },
+  //   { value: '300000-500000', label: 'Rp 300.000 - Rp 500.000' },
+  //   { value: '500000-1000000', label: 'Rp 500.000 - Rp 1.000.000' },
+  //   { value: '1000000', label: 'Above Rp 1.000.000' },
+  // ];
 
   const genres = [
     'Rock',
@@ -100,6 +100,7 @@ const ProductFilters = () => {
       </div>
 
       {/* Price Range Filter */}
+      {/*
       <div>
         <h3 className="font-semibold mb-3 uppercase text-sm tracking-wider">Price Range</h3>
         <div className="space-y-2">
@@ -136,6 +137,7 @@ const ProductFilters = () => {
           })}
         </div>
       </div>
+      */}
 
       {/* Genre Filter */}
       <div>

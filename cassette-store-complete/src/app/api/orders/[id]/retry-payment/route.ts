@@ -31,7 +31,8 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
       );
     }
 
-    for (const item of order.items as any[]) { // Cast to any[] to access product properties
+    for (const item of order.items as any[]) {
+      // Cast to any[] to access product properties
       // Ensure product is populated and has a stock property
       if (item.product && item.product.stock !== undefined && item.product.stock < item.quantity) {
         return NextResponse.json(
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
         name: `${item.product.name} - ${item.product.artist}`,
       })),
       callbacks: {
-        finish: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success?orderId=${order.orderId}`,
+        finish: `${process.env.NEXT_PUBLIC_BASE_URL}/orders/${order.orderId}`,
       },
     };
 

@@ -97,28 +97,28 @@ const Footer = () => {
             <h4 className="text-lg font-semibold mb-2 text-accent-gold">Follow Us</h4>
             <div className="flex gap-2">
               <a
-                href="https://instagram.com/cassettestore"
+                href="https://www.instagram.com/hysteria8186"
                 className="bg-accent-gold p-1.5 rounded-full hover:bg-accent-hover transition-colors"
                 title="Follow us on Instagram"
               >
                 <Instagram size={16} />
               </a>
               <a
-                href="https://facebook.com/cassettestore"
+                href="https://www.instagram.com/hysteria8186"
                 className="bg-accent-gold p-1.5 rounded-full hover:bg-accent-hover transition-colors"
                 title="Follow us on Facebook"
               >
                 <Facebook size={16} />
               </a>
               <a
-                href="https://twitter.com/cassettestore"
+                href="https://www.instagram.com/hysteria8186"
                 className="bg-accent-gold p-1.5 rounded-full hover:bg-accent-hover transition-colors"
                 title="Follow us on Twitter"
               >
                 <Twitter size={16} />
               </a>
               <a
-                href="https://youtube.com/cassettestore"
+                href="https://www.instagram.com/hysteria8186"
                 className="bg-accent-gold p-1.5 rounded-full hover:bg-accent-hover transition-colors"
                 title="Subscribe to our YouTube"
               >

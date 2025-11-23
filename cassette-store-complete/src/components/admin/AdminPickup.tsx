@@ -251,7 +251,7 @@ export default function PickupVerificationPage() {
     setConfirmingPayment(true);
 
     try {
-      const response = await fetch(`/api/orders/${order._id}/status`, {
+      const response = await fetch(`/api/orders/${order.orderId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -311,7 +311,7 @@ export default function PickupVerificationPage() {
     setVerifying(true);
 
     try {
-      const response = await fetch(`/api/orders/${order._id}/pickup`, {
+      const response = await fetch(`/api/orders/${order.orderId}/pickup`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

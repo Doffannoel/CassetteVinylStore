@@ -87,7 +87,7 @@ const OrdersPage = () => {
       if (data.success && data.token) {
         (window as any).snap.pay(data.token, {
           onSuccess: function (result: any) {
-            router.push(`/payment/success?order_id=${orderId}`);
+            router.push(`/orders/${order.orderId}`);
           },
           onPending: function (result: any) {
             router.push(`/orders/${orderId}?status=pending`);
@@ -181,11 +181,11 @@ const OrdersPage = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="border-t my-4"></div>
 
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                     <div className="flex-grow">
+                    <div className="flex-grow">
                       <h3 className="font-semibold text-md mb-3">Items</h3>
                       <div className="flex space-x-4 overflow-x-auto pb-2">
                         {order.items.filter(item => item.product).map((item) => (

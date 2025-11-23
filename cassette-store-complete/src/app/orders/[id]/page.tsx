@@ -94,7 +94,7 @@ export default function OrderDetailsPage() {
       (window as any).snap.pay(token, {
         onSuccess: function (result: any) {
           toast.success('Pembayaran berhasil!');
-          router.push(`/payment/success?orderId=${order.orderId}`);
+          router.push(`/orders/${order.orderId}`);
         },
         onPending: function (result: any) {
           toast('Menunggu pembayaran Anda.');

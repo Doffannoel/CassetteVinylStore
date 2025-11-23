@@ -87,7 +87,7 @@ const OrdersPage = () => {
       if (data.success && data.token) {
         (window as any).snap.pay(data.token, {
           onSuccess: function (result: any) {
-            router.push(`/orders/${order.orderId}`);
+            router.push(`/orders/${orderId}`);
           },
           onPending: function (result: any) {
             router.push(`/orders/${orderId}?status=pending`);

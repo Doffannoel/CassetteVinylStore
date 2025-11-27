@@ -175,10 +175,12 @@ const InvoiceTemplate = ({ order }: { order: any }) => {
           </View>
           <View style={styles.companyInfo}>
             <Text>Hysteria Music Store</Text>
-            <Text>Jl. Contoh No. 123</Text>
-            <Text>Kota Contoh, 12345</Text>
-            <Text>Email: info@hysteriamusic.com</Text>
-            <Text>Phone: (123) 456-7890</Text>
+            <Text>
+              Blok M Square, Jalan Melawai 5, RT.3/RW.1, Kuningan, Melawai, Kec. Kby. Baru
+            </Text>
+            <Text>, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12150</Text>
+            <Text>Email: musichisteria@gmail.com</Text>
+            <Text>Phone: +62818908186</Text>
           </View>
         </View>
 
@@ -202,7 +204,7 @@ const InvoiceTemplate = ({ order }: { order: any }) => {
             </View>
             <View style={{ textAlign: 'right' }}>
               <Text style={styles.subheading}>INVOICE #:</Text>
-              <Text style={styles.text}>{order._id}</Text>
+              <Text style={styles.text}>{order.orderId}</Text>
               <Text style={styles.subheading}>INVOICE DATE:</Text>
               <Text style={styles.text}>{invoiceDate}</Text>
               {order.pickupCode && (
@@ -267,10 +269,7 @@ const InvoiceTemplate = ({ order }: { order: any }) => {
         </View>
         <Text style={styles.footer}>
           Thank you for your purchase from Hysteria Music!
-          <Text>
-            {' '}
-            Visit us at www.hysteriamusic.com
-          </Text>
+          <Text> Visit us at www.hysteriamusic.com</Text>
         </Text>
       </Page>
     </Document>

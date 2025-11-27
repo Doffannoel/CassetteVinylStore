@@ -47,6 +47,9 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     // Generate invoice data for PDF
     const invoiceData = {
       _id: order._id?.toString(),
+      orderId: order.orderId,
+      pickupCode: order.pickupCode,
+      createdAt: order.createdAt,
       customerName: order.customerInfo.name,
       customerEmail: order.customerInfo.email,
       totalAmount: order.totalAmount,

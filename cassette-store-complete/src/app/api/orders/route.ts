@@ -197,16 +197,6 @@ export async function POST(request: NextRequest) {
       pickupCode,
     });
 
-    // Reduce stock for each product
-    for (const item of items) {
-      await Product.findByIdAndUpdate(item.productId, {
-        $inc: { 
-          stock: -item.quantity,
-          soldCount: item.quantity,
-        },
-      });
-    }
-
     // Populate product details for response
     const populatedOrder = await Order.findById(order._id).populate('items.product');
 

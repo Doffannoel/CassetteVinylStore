@@ -39,6 +39,7 @@ export interface IOrder extends Document {
   pickupCode?: string;
   pickedUpBy?: string;
   pickedUpAt?: Date;
+  stockReduced?: boolean;
   createdAt: Date;
   updatedAt: Date;
   updateStatus: (newStatus: string) => Promise<IOrder>;
@@ -155,6 +156,10 @@ const OrderSchema = new Schema<IOrder, IOrderModel>(
     completedAt: Date,
     cancelledAt: Date,
     pickupCode: String,
+    stockReduced: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

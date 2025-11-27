@@ -81,10 +81,11 @@ export async function POST(request: NextRequest) {
       items: orderItems,
       customerInfo,
       totalAmount,
-      status: 'ready_pickup', // Order is immediately ready for pickup
+      status: 'ready_for_pickup', // Corrected status
       paymentStatus: 'pending',
       paymentMethod: 'Pay at Store',
       pickupCode,
+      stockReduced: true, // Mark stock as reduced
     });
 
     // Reduce stock for each product

@@ -51,10 +51,28 @@ export async function POST(request: NextRequest) {
       } else if (fraudStatus === 'accept') {
         orderStatus = 'paid';
         paymentStatus = 'paid';
+        // Reduce stock if not already reduced
+        if (!order.stockReduced) {
+          for (const item of order.items) {
+            await Product.findByIdAndUpdate(item.product, {
+              $inc: { stock: -item.quantity },
+            });
+          }
+          order.stockReduced = true;
+        }
       }
     } else if (transactionStatus === 'settlement') {
       orderStatus = 'paid';
       paymentStatus = 'paid';
+      // Reduce stock if not already reduced
+      if (!order.stockReduced) {
+        for (const item of order.items) {
+          await Product.findByIdAndUpdate(item.product, {
+            $inc: { stock: -item.quantity },
+          });
+        }
+        order.stockReduced = true;
+      }
     } else if (
       transactionStatus === 'cancel' ||
       transactionStatus === 'deny' ||

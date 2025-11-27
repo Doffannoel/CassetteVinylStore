@@ -78,6 +78,16 @@ export async function PUT(
     // Update status using the model method
     await order.updateStatus(status);
 
+    // If order is cancelled, restore stock
+    if (status === 'cancelled' && order.stockReduced) {
+      for (const item of order.items) {
+        await Product.findByIdAndUpdate(item.product, {
+          $inc: { stock: item.quantity },
+        });
+      }
+      order.stockReduced = false;
+    }
+
     // Update payment status if order is paid
     if (status === 'paid' || status === 'completed') {
       order.paymentStatus = 'paid';

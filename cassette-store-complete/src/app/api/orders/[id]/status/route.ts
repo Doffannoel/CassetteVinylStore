@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Order from '@/models/Order';
+import Product from '@/models/Product';
 import Cart from '@/models/Cart';
 import { verifyToken, JWTPayload } from '@/utils/auth';
 
@@ -91,9 +92,12 @@ export async function PUT(
     // Update payment status if order is paid
     if (status === 'paid' || status === 'completed') {
       order.paymentStatus = 'paid';
-      await order.save();
+    }
 
-      // Clear the user's cart
+    await order.save();
+
+    // If order is paid, clear the user's cart
+    if (order.paymentStatus === 'paid') {
       await Cart.deleteOne({ userId: order.userId });
     }
 

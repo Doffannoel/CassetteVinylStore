@@ -70,7 +70,7 @@ const OrdersPage = () => {
           throw new Error('Failed to fetch orders');
         }
         const data = await res.json();
-        setOrders(data.orders);
+        setOrders(data.data?.orders || []);
       } catch (err: any) {
         setError(err.message);
       } finally {

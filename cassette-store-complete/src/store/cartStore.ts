@@ -240,8 +240,8 @@ const useCartStore = create<CartStore>()(
       },
 
       getTotalItems: () => {
-        const state = get();
-        return state.items.reduce((total, item) => total + item.quantity, 0);
+        const { items } = get();
+        return (items || []).reduce((total, item) => total + (item.quantity || 0), 0);
       },
 
       getTotalAmount: () => {

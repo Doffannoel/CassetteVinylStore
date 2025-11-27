@@ -20,12 +20,15 @@ export async function GET(
 
     // The 'id' param can be either the MongoDB _id or the custom orderId string
     if (mongoose.Types.ObjectId.isValid(id)) {
-      order = await Order.findOne({ orderId: id }).populate(productPopulation).lean();
+      // If it's a valid ObjectId, search by _id first
+      order = await Order.findById(id).populate(productPopulation).lean();
     }
 
-    order = await Order.findOne({ orderId: id })
-      .populate(productPopulation)
-      .lean();
+    // If no order was found by _id OR if the id was not a valid ObjectId,
+    // try searching by the custom orderId string.
+    if (!order) {
+      order = await Order.findOne({ orderId: id }).populate(productPopulation).lean();
+    }
 
 
     if (!order) {

@@ -3,7 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import useCartStore from '@/store/cartStore';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 export default function CheckoutPage() {
@@ -12,6 +12,31 @@ export default function CheckoutPage() {
   const { items, getTotalAmount, clearCart } = useCartStore();
   const [isProcessing, setIsProcessing] = useState(false);
   const [phone, setPhone] = useState('');
+
+  useEffect(() => {
+    const midtransScriptUrl =
+      process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === 'true'
+        ? 'https://app.midtrans.com/snap/snap.js'
+        : 'https://app.sandbox.midtrans.com/snap/snap.js';
+
+    let script = document.querySelector<HTMLScriptElement>(`script[src="${midtransScriptUrl}"]`);
+
+    if (!script) {
+      script = document.createElement('script');
+      script.src = midtransScriptUrl;
+      script.setAttribute('data-client-key', process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY!);
+      script.async = true;
+      document.head.appendChild(script);
+    }
+
+    return () => {
+      // Optional: Cleanup script when component unmounts
+      // if (script && script.parentNode) {
+      //   script.parentNode.removeChild(script);
+      // }
+    };
+  }, []);
+
 
   const totalPrice = getTotalAmount();
 

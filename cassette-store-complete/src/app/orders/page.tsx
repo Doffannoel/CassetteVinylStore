@@ -41,8 +41,12 @@ const OrdersPage = () => {
 
   useEffect(() => {
     // Load Midtrans Snap script
+    const midtransScriptUrl =
+      process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === 'true'
+        ? 'https://app.midtrans.com/snap/snap.js'
+        : 'https://app.sandbox.midtrans.com/snap/snap.js';
     const script = document.createElement('script');
-    script.src = `https://app.sandbox.midtrans.com/snap/snap.js`; // Ganti ke production jika perlu
+    script.src = midtransScriptUrl; // Ganti ke production jika perlu
     script.setAttribute('data-client-key', process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY!);
     document.body.appendChild(script);
 

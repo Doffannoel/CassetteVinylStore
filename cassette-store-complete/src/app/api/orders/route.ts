@@ -7,9 +7,9 @@ import { verifyToken, JWTPayload } from '@/utils/auth';
 
 // Initialize Midtrans Snap API
 const snap = new midtransClient.Snap({
-  isProduction: process.env.NODE_ENV === 'production',
+  isProduction: process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === 'true',
   serverKey: process.env.MIDTRANS_SERVER_KEY,
-  clientKey: process.env.MIDTRANS_CLIENT_KEY,
+  clientKey: process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY,
 });
 
 // GET /api/orders - Get orders for the logged-in user OR all orders for admin

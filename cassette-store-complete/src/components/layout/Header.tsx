@@ -136,13 +136,13 @@ const Header = () => {
                                 My Profile
                               </Link> */}
 
-                              {/* <Link
+                              <Link
                                 href="/orders"
                                 className="block px-4 py-2 text-sm hover:bg-neutral-card"
                                 onClick={() => setShowUserMenu(false)}
                               >
                                 My Orders
-                              </Link> */}
+                              </Link>
                               {user.role === 'admin' && (
                                 <Link
                                   href="/admin"

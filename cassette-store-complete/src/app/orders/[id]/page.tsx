@@ -13,6 +13,7 @@ import {
   MessageCircle,
   Store,
   AlertCircle,
+  FileDown,
 } from 'lucide-react';
 import { IOrder } from '@/models/Order';
 import toast from 'react-hot-toast';
@@ -606,11 +607,19 @@ export default function OrderDetailsPage() {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3">
+          {['paid', 'ready_for_pickup', 'completed'].includes(order.status) && (
+            <Link
+              href={`/api/orders/${order._id}/invoice`}
+              className="btn-primary flex-1 text-center flex items-center justify-center gap-2"
+              target="_blank"
+              download
+            >
+              <FileDown size={18} />
+              Download Invoice
+            </Link>
+          )}
           <Link href="/products" className="btn-secondary flex-1 text-center">
             Lanjut Belanja
-          </Link>
-          <Link href="/" className="btn-primary flex-1 text-center">
-            Kembali ke Beranda
           </Link>
         </div>
 

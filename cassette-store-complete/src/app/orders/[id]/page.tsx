@@ -594,7 +594,8 @@ export default function OrderDetailsPage() {
               <p className="text-text-body">
                 <strong>{process.env.NEXT_PUBLIC_STORE_NAME || 'Hysteria Music Jakarta'}</strong>
                 <br />
-                {process.env.NEXT_PUBLIC_STORE_ADDRESS || 'Jl. Musik No. 123, Jakarta Selatan'}
+                {process.env.NEXT_PUBLIC_STORE_ADDRESS ||
+                  'Blok M Square, Jalan Melawai 5, RT.3/RW.1, Kuningan, Melawai, Kec. Kby. Baru'}
                 <br />
                 Telp: {process.env.NEXT_PUBLIC_STORE_PHONE || '021-12345678'}
               </p>

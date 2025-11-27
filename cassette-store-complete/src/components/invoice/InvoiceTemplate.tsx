@@ -178,7 +178,7 @@ const InvoiceTemplate = ({ order }: { order: any }) => {
             <Text>
               Blok M Square, Jalan Melawai 5, RT.3/RW.1, Kuningan, Melawai, Kec. Kby. Baru
             </Text>
-            <Text>, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12150</Text>
+            <Text>Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12150</Text>
             <Text>Email: musichisteria@gmail.com</Text>
             <Text>Phone: +62818908186</Text>
           </View>

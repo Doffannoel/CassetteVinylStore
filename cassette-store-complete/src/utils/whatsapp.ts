@@ -76,7 +76,9 @@ export const generateWhatsAppMessage = (orderData: WhatsAppOrderData): string =>
   message += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
   message += `📍 *AMBIL BARANG DI TOKO*\n`;
-  message += storeAddress || `Hysteria Music\nJl. Musik No. 123\nJakarta Selatan\n`;
+  message +=
+    storeAddress ||
+    `Hysteria Music\nBlok. M Square\nJalan Melawai 5\n RT.3/RW.1\nKuningan, Melawai`;
   message += `\n📞 Hubungi: ${storePhone || '021-12345678'}\n\n`;
 
   message += `⚠️ *PENTING:*\n`;

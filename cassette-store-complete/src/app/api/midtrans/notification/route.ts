@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
 
     await order.save();
 
-    console.log(`Order ${order.orderId} updated: status=${orderStatus}, payment=${paymentStatus}`);
+    // console.log(`Order ${order.orderId} updated: status=${orderStatus}, payment=${paymentStatus}`);
 
     return NextResponse.json({
       success: true,

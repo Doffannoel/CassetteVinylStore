@@ -24,7 +24,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     }
 
     await connectDB();
-    console.log('API received order ID:', params.id);
+    // console.log('API received order ID:', params.id);
 
     if (!mongoose.isValidObjectId(params.id)) {
       return NextResponse.json({ success: false, message: 'Invalid Order ID' }, { status: 400 });
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
       return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 });
     }
 
-    console.log('Fetched order:', JSON.stringify(order, null, 2));
+    // console.log('Fetched order:', JSON.stringify(order, null, 2));
 
     // Generate invoice data for PDF
     const invoiceData = {
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
         price: item.price,
       })),
     };
-    console.log('Generated invoiceData:', JSON.stringify(invoiceData, null, 2));
+    // console.log('Generated invoiceData:', JSON.stringify(invoiceData, null, 2));
 
     // Generate PDF
     const pdfBuffer = await renderToBuffer(<InvoiceTemplate order={invoiceData} />);

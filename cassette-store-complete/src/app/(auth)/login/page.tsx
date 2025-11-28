@@ -64,7 +64,7 @@ const LoginPage: React.FC = () => {
       window.location.href = '/'; // redirect ke home/dashboard
 
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       alert('Server error. Please try again.');
     }
   };

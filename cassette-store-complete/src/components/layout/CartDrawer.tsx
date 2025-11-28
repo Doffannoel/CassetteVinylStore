@@ -14,7 +14,7 @@ const CartDrawer = () => {
   const totalAmount = getTotalAmount();
 
   useEffect(() => {
-    console.log('🔐 Auth State:', { isAuthenticated, user, isLoading });
+    // console.log('🔐 Auth State:', { isAuthenticated, user, isLoading });
   }, [isAuthenticated, user, isLoading]);
 
   useEffect(() => {

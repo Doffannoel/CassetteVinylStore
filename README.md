@@ -88,6 +88,7 @@ Aplikasi menghubungkan pembelian online dengan operasional toko fisik secara efi
 
 ## 💻 Cara Menjalankan Project
 ```bash
+cd cassette-store-complete
 npm install
 npm run dev
 ```
